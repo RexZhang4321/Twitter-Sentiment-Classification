@@ -14,6 +14,7 @@ stemmer = nltk.stem.porter.PorterStemmer()
 
 def load_data(path, names=None, usecols=None):
     data = pd.read_csv(path, header=None, names=names, usecols=usecols)
+    data['class'] = data['class'].map({0: -1, 2: 0, 4: 1})
     return data.reindex(np.random.permutation(data.index))
 
 
@@ -74,10 +75,11 @@ def get_training_and_testing(data):
     return x_train.values, y_train.values, x_test.values, y_test.values
 
 if __name__ == '__main__':
-    path = '../data/training.csv'
+    path = '../data/test.csv'
     names = ["class", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
     dt = load_data(path, names=names, usecols=usecols)
+    print dt
     print "loading finished"
     # get training set and test set in numpy representation
     dic = generate_dict_for_BOW(dt[:100])
