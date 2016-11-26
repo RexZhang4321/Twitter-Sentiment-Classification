@@ -30,6 +30,9 @@ class MNBC:
     def __init__(self, diff=0):
         self.diff = diff
 
+    def set_diff(self, diff):
+        self.diff = diff
+
     def fit(self, x_train, y_train):
         n_train = len(x_train)
         n_word = len(x_train[0])
@@ -83,12 +86,12 @@ class MNBC:
 
 
 def naive_bayes_3_points():
-    path = '../data/training.csv'
+    path = '../data/training2.csv'
     names = ["class", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
     dt = preprocessing.load_data(path, names=names, usecols=usecols)
     print "loading finished"
-    n_records = 10000 # 74.47% in 50000 samples
+    n_records = 10000
     dic = preprocessing.generate_dict_for_BOW(dt[:n_records])
     print "dict size:", len(dic)
     x_train = dt['data'][:n_records].values
@@ -99,9 +102,10 @@ def naive_bayes_3_points():
     # print len(x_test), len(y_test)
     x_train = preprocessing.generate_BOW(x_train, dic)
     x_test = preprocessing.generate_BOW(x_test, dic)
+    clf = MNBC(diff=0)
     for i in range(0, 100):
         diff = 0.0 + i / 100.0
-        clf = MNBC(diff=diff)
+        clf.set_diff(diff=diff)
         clf.fit(x_train, y_train)
         print diff, clf.score(x_test, y_test)
 

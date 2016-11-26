@@ -65,7 +65,7 @@ word_bound_regex = re.compile(r"\W+")
 
 
 # Repeating words like hurrrryyyyyy
-rpt_regex = re.compile(r"(.)\1{1,}", re.IGNORECASE);
+rpt_regex = re.compile(r"(.)\1{1,}", re.IGNORECASE)
 def rpt_repl(match):
     return match.group(1)+match.group(1)
 
