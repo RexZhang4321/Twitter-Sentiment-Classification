@@ -42,12 +42,12 @@ class MNBC:
             cur = thetaPos if y_train[i] == 1 else thetaNeg
             for j in range(0, n_word):
                 cur[j] += x_train[i][j]
-        total_words = sum(thetaPos)
-        thetaPos = [(k + 1.0) / (total_words + n_word) for k in thetaPos]
-        total_words = sum(thetaNeg)
-        thetaNeg = [(k + 1.0) / (total_words + n_word) for k in thetaNeg]
-        self.thetaPos = np.log(np.array(thetaPos))
-        self.thetaNeg = np.log(np.array(thetaNeg))
+        total_pos_words = sum(thetaPos)
+        total_neg_words = sum(thetaNeg)
+        thetaPos = (np.array(thetaPos) + 1.0) / (total_pos_words + n_word)
+        thetaNeg = (np.array(thetaNeg) + 1.0) / (total_neg_words + n_word)
+        self.thetaPos = np.log(thetaPos)
+        self.thetaNeg = np.log(thetaNeg)
 
     def predict(self, x_test):
         x_test = np.array(x_test)
