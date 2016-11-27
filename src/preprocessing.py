@@ -46,14 +46,18 @@ def parse_row(row):
 
 # Hashtags
 hash_regex = re.compile(r"#(\w+)")
+
+
 def hash_repl(match):
     return '__HASH_'+match.group(1).upper()
 
 
-# Handels
+# Handles
 hndl_regex = re.compile(r"@(\w+)")
+
+
 def hndl_repl(match):
-    return '__HNDL'#_'+match.group(1).upper()
+    return '__HNDL'
 
 
 # URLs
@@ -66,6 +70,8 @@ word_bound_regex = re.compile(r"\W+")
 
 # Repeating words like hurrrryyyyyy
 rpt_regex = re.compile(r"(.)\1{1,}", re.IGNORECASE)
+
+
 def rpt_repl(match):
     return match.group(1)+match.group(1)
 
@@ -82,17 +88,10 @@ emoticons = [
 
 
 # Punctuations
-punctuations = [
-        #('',   ['.', ] ),\
-        #('',		[',', ] )	,\
-        #('',		['\'', '\"', ] )	,\
-        ('__PUNC_EXCL',     ['!', ]),\
-        ('__PUNC_QUES',     ['?', ]),\
-        ('__PUNC_ELLP',     ['...', ]),\
-    ]
+punctuations = {'!': '__PUNC_EXCL', '?': '__PUNC_QUES', '...': '__PUNC_ELLP'}
 
 
-# For emoticon regexes
+# For emoticon regex
 def escape_paren(arr):
     return [text.replace(')', '[)}\]]').replace('(', '[({\[]') for text in arr]
 
@@ -108,11 +107,10 @@ emoticons_regex = [(repl, re.compile(regex_union(escape_paren(regx))))
 def punctuations_repl(match):
     text = match.group(0)
     repl = []
-    for (key, parr) in punctuations:
-        for punc in parr:
-            if punc in text:
-                repl.append(key)
-    if (len(repl) > 0):
+    for (key, val) in punctuations.items():
+        if key in text:
+            repl.append(val)
+    if len(repl) > 0:
         return ' ' + ' '.join(repl) + ' '
     else:
         return ' '
