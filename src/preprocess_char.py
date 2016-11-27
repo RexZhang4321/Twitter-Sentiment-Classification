@@ -21,8 +21,37 @@ def purify_row(row):
     return row
 
 
-def load_from_file():
-    pass
+def preprocess_data(data):
+    vocab = {}
+    new_data = []
+    ct = 0
+    for line in data:
+        line = purify_row(line)
+        new_data.append(line)
+        chars = list(line)
+        for c in chars:
+            if c not in vocab:
+                vocab[c] = ct
+                ct += 1
+    print vocab
+    for i, line in enumerate(new_data):
+        ints = map(lambda c: vocab[c], line)
+        ints_str = ' '.join([str(c) for c in ints])
+        new_data[i] = ints_str
+    return new_data, vocab
+
+
+def load_from_file(path, names=None, usecols=None):
+    dt = load_data(path, names=names, usecols=usecols)
+    y = dt['class'].values
+    x = dt['data'].values
+    x, vocab = preprocess_data(x)
+    return x, y, vocab
 
 if __name__ == '__main__':
-    print purify_row("#sdc asd @sadv sdv http://asdn oh")
+    path = '../data/test.csv'
+    names = ["class", "id", "time", "query", "user", "data"]
+    usecols = [0, 5]
+    x, y, vocab = load_from_file(path, names=names, usecols=usecols)
+    print x
+    print y
