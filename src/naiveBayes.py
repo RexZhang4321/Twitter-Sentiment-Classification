@@ -7,7 +7,7 @@ def naive_bayes_2_points():
     path = '../data/training.csv'
     names = ["class", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
-    dt = preprocessing.load_data(path, names=names, usecols=usecols)
+    dt = preprocessing.load_data(path, {0: -1, 2: 0, 4: 1}, names=names, usecols=usecols)
     print "loading finished"
     n_records = 5000 # 74.47% in 50000 samples
     dic = preprocessing.generate_dict_for_BOW(dt[:n_records])
@@ -15,6 +15,27 @@ def naive_bayes_2_points():
     x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing(dt[:n_records])
     x_train = preprocessing.generate_BOW(x_train, dic)
     x_test = preprocessing.generate_BOW(x_test, dic)
+    clf = MultinomialNB()
+    clf.fit(x_train, y_train)
+    print "training finished"
+    print clf.score(x_test, y_test)
+
+
+def naive_bayes_3_points_2():
+    path = '../data/semeval/train.tsv'
+    names = ["id", "class", "data"]
+    dt = preprocessing.load_data(path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
+    print "loading finished"
+    dic = preprocessing.generate_dict_for_BOW(dt, n_gram=3)
+    print "dict size:", len(dic)
+    x_train, y_train = preprocessing.get_data_and_label(dt)
+    x_train = preprocessing.generate_BOW(x_train, dic, n_gram=3)
+
+    test_path = '../data/semeval/test.tsv'
+    test_dt = preprocessing.load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
+    x_test, y_test = preprocessing.get_data_and_label(test_dt)
+    x_test = preprocessing.generate_BOW(x_test, dic, n_gram=3)
+
     clf = MultinomialNB()
     clf.fit(x_train, y_train)
     print "training finished"
@@ -89,14 +110,14 @@ def naive_bayes_3_points():
     path = '../data/training2.csv'
     names = ["class", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
-    dt = preprocessing.load_data(path, names=names, usecols=usecols)
+    dt = preprocessing.load_data(path, {0: -1, 2: 0, 4: 1}, names=names, usecols=usecols)
     print "loading finished"
     n_records = 10000
     dic = preprocessing.generate_dict_for_BOW(dt[:n_records])
     print "dict size:", len(dic)
     words_train = dt['data'][:n_records].values
     y_train = dt['class'][:n_records].values
-    dt2 = preprocessing.load_data('../data/testing.csv', names=names, usecols=usecols)
+    dt2 = preprocessing.load_data('../data/testing.csv', {0: -1, 2: 0, 4: 1}, names=names, usecols=usecols)
     words_test = dt2['data'].values
     y_test = dt2['class'].values
     # print len(x_test), len(y_test)
@@ -111,4 +132,5 @@ def naive_bayes_3_points():
 
 if __name__ == '__main__':
     #naive_bayes_2_points()
-    naive_bayes_3_points()
+    #naive_bayes_3_points()
+    naive_bayes_3_points_2()

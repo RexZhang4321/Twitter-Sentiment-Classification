@@ -11,9 +11,9 @@ punctuation = string.punctuation
 stemmer = nltk.stem.porter.PorterStemmer()
 
 
-def load_data(path, names=None, usecols=None):
-    data = pd.read_csv(path, header=None, names=names, usecols=usecols)
-    data['class'] = data['class'].map({0: -1, 2: 0, 4: 1})
+def load_data(path, class_map, sep=",", names=None, usecols=None):
+    data = pd.read_csv(path, sep=sep, header=None, names=names, usecols=usecols)
+    data['class'] = data['class'].map(class_map)
     return data.reindex(np.random.permutation(data.index))
 
 
@@ -43,7 +43,6 @@ def parse_row(row):
 
 def extract_bigram_after_parsing(row):
     return [bg for bg in nltk.bigrams(row)]
-
 
 def extract_trigram_after_parsing(row):
     return [tg for tg in nltk.trigrams(row)]
@@ -115,12 +114,20 @@ def punctuations_repl(match):
         return ' '
 
 
-def generate_dict_for_BOW(dt):
+def generate_dict_for_BOW(dt, n_gram=1):
     word_dic = {}
     for row in dt["data"]:
         parsed_row = parse_row(row)
-        parsed_row_bi = extract_bigram_after_parsing(parsed_row)
-        parsed_row_tri = extract_trigram_after_parsing(parsed_row)
+        if n_gram >= 2:
+            parsed_row_bi = extract_bigram_after_parsing(parsed_row)
+        else:
+            parsed_row_bi = []
+
+        if n_gram >= 3:
+            parsed_row_tri = extract_trigram_after_parsing(parsed_row)
+        else:
+            parsed_row_tri = []
+
         for word in parsed_row + parsed_row_bi + parsed_row_tri:
             if word in word_dic:
                 word_dic[word] += 1
@@ -136,13 +143,21 @@ def generate_dict_for_BOW(dt):
     return word_dic.keys()
 
 
-def generate_BOW(dt, keys):
+def generate_BOW(dt, keys, n_gram=1):
     data = []
     for row in dt:
         words = np.zeros(len(keys))
         parsed_row = parse_row(row)
-        parsed_row_bi = extract_bigram_after_parsing(parsed_row)
-        parsed_row_tri = extract_trigram_after_parsing(parsed_row)
+
+        if n_gram >= 2:
+            parsed_row_bi = extract_bigram_after_parsing(parsed_row)
+        else:
+            parsed_row_bi = []
+
+        if n_gram >= 3:
+            parsed_row_tri = extract_trigram_after_parsing(parsed_row)
+        else:
+            parsed_row_tri = []
 
         for word in parsed_row + parsed_row_bi + parsed_row_tri:
             if word in keys:
@@ -162,6 +177,14 @@ def get_training_and_testing(data):
     y_test = data["class"][n_train:]
     print pd.DataFrame(y_test).groupby("class").size()
     return x_train.values, y_train.values, x_test.values, y_test.values
+
+
+def get_data_and_label(data):
+    n = len(data)
+    x = data["data"][:n]
+    y = data["class"][:n]
+    return x, y
+
 
 if __name__ == '__main__':
     path = '../data/test.csv'
