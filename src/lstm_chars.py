@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import numpy as np
 import theano
 import theano.tensor as T
@@ -8,6 +9,7 @@ import hparams
 from evaluate import ConfusionMatrix
 from collections import OrderedDict
 import time
+import preprocess_char
 
 MAXLEN = 140
 SEED = 1234
@@ -139,6 +141,10 @@ def learn_model(hyparams, x_train, y_train, vocab):
     RNG = np.random.RandomState(SEED)
     timestamp = time.strftime('%m%d%Y_%H%M%S')
 
+    # ### sanity check ###
+    pad_char = u'♥'
+    vocab[pad_char] = 0
+
     V = len(vocab)
     n_classes = len(set(y_train))
     print "Vocab size:", V
@@ -166,6 +172,12 @@ def learn_model(hyparams, x_train, y_train, vocab):
                             updates=grad_updates,
                             allow_input_downcast=True)
 
+    test_output = lasagne.layers.get_output(network['softmax'], deterministic=True)
+    val_cost_fn = lasagne.objectives.categorical_crossentropy(test_output, y).mean()
+    preds = T.argmax(test_output, axis=1)
+    val_acc_fn = T.mean(T.eq(preds, y), dtype=theano.config.floatX)
+    val_fn = theano.function([X, M, y], [val_cost_fn, val_acc_fn, preds], allow_input_downcast=True)
+
     batchsize = hyparams.batchsize
     n_epochs = hyparams.nepochs
     n_batches = x_train.shape[0] / batchsize
@@ -180,32 +192,63 @@ def learn_model(hyparams, x_train, y_train, vocab):
 
         for batch in iterate_minibatches(x_train, y_train, batchsize, rng=RNG, shuffle=True):
             x_mini, y_mini = batch
-            train_err += train(x_mini[:, :, 0], x_mini[:, :, 0], y_mini)
+            try:
+                train_err += train(x_mini[:, :, 0], x_mini[:, :, 1], y_mini)
+            except:
+                print x_mini
+                print y_mini
+                print len(x_mini), len(y_mini)
+                exit(1)
+            # train_err += train(x_mini[:, :, 0], x_mini[:, :, 1], y_mini)
             train_batches += 1
-            print '[epoch %d batch %d/%d]' % (epoch, train_batches, nbatches)
+            print '[epoch %d batch %d/%d]' % (epoch, train_batches, n_batches)
 
         print "Epoch {} of {} took {:.3f}s\n".format(
-            epoch + 1, num_epochs, time.time() - start_time)
+            epoch + 1, n_epochs, time.time() - start_time)
 
+    test_loss, test_acc, _ = val_fn(x_train[:, :, 0], x_train[:, :, 1], y_train)
+    print test_loss, test_acc
     return network
 
 
-def test_model(network, x_test, y_test, vocab):
+def test_model(network, x_test, y_test, hyparams, vocab):
     RNG = np.random.RandomState(SEED)
     timestamp = time.strftime('%m%d%Y_%H%M%S')
+
+    pad_char = u'♥'
+    vocab[pad_char] = 0
+    n_classes = len(set(y_test))
 
     X = T.imatrix('X')
     M = T.matrix('M')
     y = T.ivector('y')
 
-    test_output = lasagne.layers.get_output(network['softmax'], deterministic=True)
+    print "building model"
+    clf = build_model(hyparams, vocab, n_classes, invar=X, maskvar=M)
+    params = lasagne.layers.get_all_param_values(network.values())
+    lasagne.layers.set_all_param_values(clf.values(), params)
+
+    test_output = lasagne.layers.get_output(clf['softmax'], deterministic=True)
     val_cost_func = lasagne.objectives.categorical_crossentropy(test_output, y).mean()
     preds = T.argmax(test_output, axis=1)
     val_acc_func = T.mean(T.eq(preds, y), dtype=theano.config.floatX)
     val_func = theano.function([X, M, y], [val_cost_func, val_acc_func, preds], allow_input_downcast=True)
 
     test_loss, test_acc, test_pred = val_func(x_test[:, :, 0], x_test[:, :, 1], y_test)
-    test_eval = ConfusionMatrix(y_test, test_pred, set(y_test))
+    print test_loss, test_acc
 
 if __name__ == '__main__':
-    pass
+    # path = '../data/training2.csv'
+    # names = ["class", "id", "time", "query", "user", "data"]
+    # usecols = [0, 5]
+    path = '../data/semeval/train.tsv'
+    names = ["id", "classes", "data"]
+    usecols = [1, 2]
+    print "loading data..."
+    x_train, y_train, vocab = preprocess_char.load_from_file(path, names=names, usecols=usecols)
+    hyparams = hparams.HParams()
+    print hyparams
+    # x_train = x_train[:4000]
+    # y_train = y_train[:4000]
+    clf = learn_model(hyparams, x_train, y_train, vocab)
+    test_model(clf, x_train, y_train, hyparams, vocab)

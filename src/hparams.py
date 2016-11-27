@@ -1,7 +1,7 @@
 class HParams(object):
     def __init__(self,
-                 nepochs=30,
-                 batchsize=512,
+                 nepochs=1,
+                 batchsize=100,
                  learning_rate=0.1,
                  bidirectional=True,
                  nhidden=256,
