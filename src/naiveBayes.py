@@ -94,14 +94,14 @@ def naive_bayes_3_points():
     n_records = 10000
     dic = preprocessing.generate_dict_for_BOW(dt[:n_records])
     print "dict size:", len(dic)
-    x_train = dt['data'][:n_records].values
+    words_train = dt['data'][:n_records].values
     y_train = dt['class'][:n_records].values
     dt2 = preprocessing.load_data('../data/testing.csv', names=names, usecols=usecols)
-    x_test = dt2['data'].values
+    words_test = dt2['data'].values
     y_test = dt2['class'].values
     # print len(x_test), len(y_test)
-    x_train = preprocessing.generate_BOW(x_train, dic)
-    x_test = preprocessing.generate_BOW(x_test, dic)
+    x_train = preprocessing.generate_BOW(words_train, dic)
+    x_test = preprocessing.generate_BOW(words_test, dic)
     clf = MNBC(diff=0)
     for i in range(0, 100):
         diff = 0.0 + i / 100.0
@@ -110,5 +110,5 @@ def naive_bayes_3_points():
         print diff, clf.score(x_test, y_test)
 
 if __name__ == '__main__':
-    # naive_bayes_2_points()
+    #naive_bayes_2_points()
     naive_bayes_3_points()

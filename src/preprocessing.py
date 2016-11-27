@@ -20,7 +20,7 @@ def load_data(path, names=None, usecols=None):
 def parse_row(row):
     _row = []
     row = re.sub(hash_regex, hash_repl, row)
-    row = re.sub(hndl_regex, hndl_repl, row)
+    row = re.sub(user_regex, '__USERNAME', row)
     row = re.sub(url_regex, "__URL", row)
     for (repl, regx) in emoticons_regex:
         row = re.sub(regx, ' ' + repl + ' ', row)
@@ -29,36 +29,35 @@ def parse_row(row):
     row = re.sub(rpt_regex, rpt_repl, row)
     try:
         for word in word_tokenize(row):
-            # not pretty sure whether we need stopwords
-            word = word.lower()
-            word = stemmer.stem(word)
-            _row.append(word)
-            # if word in stops or len(word) == 1:
-            #         continue
-            # else:
-            #     word = word.lower()
-            #     word = stemmer.stem(word)
-            #     _row.append(word)
+            if word in stops or len(word) <= 2:
+                continue
+            else:
+                if word[0:2] != '__':
+                    word = word.lower()
+                word = stemmer.stem(word)
+                _row.append(word)
     except:
         pass
     return _row
 
+
+def extract_bigram_after_parsing(row):
+    return [bg for bg in nltk.bigrams(row)]
+
+
+def extract_trigram_after_parsing(row):
+    return [tg for tg in nltk.trigrams(row)]
 
 # Hashtags
 hash_regex = re.compile(r"#(\w+)")
 
 
 def hash_repl(match):
-    return '__HASH_'+match.group(1).upper()
+    return '__HASH_' + match.group(1).upper()
 
 
-# Handles
-hndl_regex = re.compile(r"@(\w+)")
-
-
-def hndl_repl(match):
-    return '__HNDL'
-
+# USERNAME
+user_regex = re.compile(r"@(\w+)")
 
 # URLs
 url_regex = re.compile(r"(http|https|ftp)://[a-zA-Z0-9\./]+")
@@ -73,7 +72,7 @@ rpt_regex = re.compile(r"(.)\1{1,}", re.IGNORECASE)
 
 
 def rpt_repl(match):
-    return match.group(1)+match.group(1)
+    return match.group(1) + match.group(1)
 
 
 # Emoticons
@@ -119,7 +118,10 @@ def punctuations_repl(match):
 def generate_dict_for_BOW(dt):
     word_dic = {}
     for row in dt["data"]:
-        for word in parse_row(row):
+        parsed_row = parse_row(row)
+        parsed_row_bi = extract_bigram_after_parsing(parsed_row)
+        parsed_row_tri = extract_trigram_after_parsing(parsed_row)
+        for word in parsed_row + parsed_row_bi + parsed_row_tri:
             if word in word_dic:
                 word_dic[word] += 1
             else:
@@ -138,7 +140,11 @@ def generate_BOW(dt, keys):
     data = []
     for row in dt:
         words = np.zeros(len(keys))
-        for word in parse_row(row):
+        parsed_row = parse_row(row)
+        parsed_row_bi = extract_bigram_after_parsing(parsed_row)
+        parsed_row_tri = extract_trigram_after_parsing(parsed_row)
+
+        for word in parsed_row + parsed_row_bi + parsed_row_tri:
             if word in keys:
                 words[keys.index(word)] += 1
             else:
