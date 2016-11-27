@@ -10,6 +10,8 @@ from evaluate import ConfusionMatrix
 from collections import OrderedDict
 import time
 import preprocess_char
+import pickle
+import os
 
 MAXLEN = 140
 SEED = 1234
@@ -211,7 +213,7 @@ def learn_model(hyparams, x_train, y_train, vocab):
     return network
 
 
-def test_model(network, x_test, y_test, hyparams, vocab):
+def test_model(model_fname, x_test, y_test, hyparams, vocab):
     RNG = np.random.RandomState(SEED)
     timestamp = time.strftime('%m%d%Y_%H%M%S')
 
@@ -223,10 +225,12 @@ def test_model(network, x_test, y_test, hyparams, vocab):
     M = T.matrix('M')
     y = T.ivector('y')
 
-    print "building model"
+    print "building model..."
     clf = build_model(hyparams, vocab, n_classes, invar=X, maskvar=M)
-    params = lasagne.layers.get_all_param_values(network.values())
-    lasagne.layers.set_all_param_values(clf.values(), params)
+    read_model_from_file(clf, model_fname)
+    # params = lasagne.layers.get_all_param_values(network.values())
+    # lasagne.layers.set_all_param_values(clf.values(), params)
+    print "model built."
 
     test_output = lasagne.layers.get_output(clf['softmax'], deterministic=True)
     val_cost_func = lasagne.objectives.categorical_crossentropy(test_output, y).mean()
@@ -236,19 +240,47 @@ def test_model(network, x_test, y_test, hyparams, vocab):
 
     test_loss, test_acc, test_pred = val_func(x_test[:, :, 0], x_test[:, :, 1], y_test)
     print test_loss, test_acc
+    while True:
+        txt = raw_input("Type a tweet: ")
+        txt = preprocess_char.load_from_one_text(txt, vocab)
+        _, _, test_pred = val_func(txt[:, :, 0], txt[:, :, 1], [0])
+        print "Prediction: ", test_pred
+
+
+def write_model_to_file(model, fname):
+    data = lasagne.layers.get_all_param_values(model.values())
+    fname = os.path.join('../model', fname)
+    with open(fname, 'w+') as f:
+        pickle.dump(data, f)
+
+
+def read_model_from_file(model, fname):
+    path = os.path.join('../model', fname)
+    with open(path, 'r') as f:
+        data = pickle.load(f)
+    lasagne.layers.set_all_param_values(model.values(), data)
 
 if __name__ == '__main__':
-    # path = '../data/training2.csv'
-    # names = ["class", "id", "time", "query", "user", "data"]
-    # usecols = [0, 5]
-    path = '../data/semeval/train.tsv'
-    names = ["id", "classes", "data"]
-    usecols = [1, 2]
+    path = '../data/training2.csv'
+    names = ["classes", "id", "time", "query", "user", "data"]
+    usecols = [0, 5]
+    # path = '../data/semeval/train.tsv'
+    # names = ["id", "classes", "data"]
+    # usecols = [1, 2]
     print "loading data..."
     x_train, y_train, vocab = preprocess_char.load_from_file(path, names=names, usecols=usecols)
+    print y_train
     hyparams = hparams.HParams()
+    hyparams.bidirectional = False
     print hyparams
-    # x_train = x_train[:4000]
-    # y_train = y_train[:4000]
+    x_train = x_train[:4000]
+    y_train = y_train[:4000]
+    cnt = 0
+    for i in y_train:
+        if i == 0:
+            cnt += 1
+    print cnt
     clf = learn_model(hyparams, x_train, y_train, vocab)
-    test_model(clf, x_train, y_train, hyparams, vocab)
+    fname = "test1_2point_4000_onedire"
+    write_model_to_file(clf, fname)
+    test_model(fname, x_train, y_train, hyparams, vocab)

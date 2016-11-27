@@ -3,17 +3,18 @@ import pandas as pd
 import re
 
 
-hash_regex = re.compile(r"#(\w+)")
+hash_regex = re.compile(r"#")
 hndl_regex = re.compile(r"@(\w+)")
 url_regex = re.compile(r"(http|https|ftp)://[a-zA-Z0-9\./]+")
 
 
 def load_data(path, names=None, usecols=None):
-    data = pd.read_csv(path, delimiter="\t", header=None, names=names, usecols=usecols)
+    # data = pd.read_csv(path, delimiter="\t", header=None, names=names, usecols=usecols)
+    data = pd.read_csv(path, header=None, names=names, usecols=usecols)
     # data['class'] = data['class'].map({0: 0, 2: 0, 4: 1})
-    data = data[~data['classes'].str.contains('neutral')]
-    data = data.replace({'classes': {'negative': 0, 'positive': 1}})
-    # data['classes'] = data['classes'].map({"negative": 0, ''''"neutral": 1,''' "positive": 1})
+    # data = data[~data['classes'].str.contains('neutral')]
+    # data = data.replace({'classes': {'negative': 0, 'positive': 1}})
+    data['classes'] = data['classes'].map({0: 0, 4: 1})
     return data.reindex(np.random.permutation(data.index))
 
 
@@ -38,7 +39,6 @@ def preprocess_data(data):
             if c not in vocab:
                 vocab[c] = ct
                 ct += 1
-    print vocab
     for i, line in enumerate(new_data):
         ints = map(lambda c: vocab[c], line)
         new_data[i] = ints
@@ -46,12 +46,24 @@ def preprocess_data(data):
 
 
 def load_from_file(path, names=None, usecols=None):
-    dt = load_data(path, names=names, usecols=usecols)[:100]
+    dt = load_data(path, names=names, usecols=usecols)
+    print dt
     y = dt['classes'].values
+    y = np.array(y, dtype=np.int64)
     x = dt['data'].values
     x, vocab = preprocess_data(x)
     x = pad_mask(x)
     return x, y, vocab
+
+
+def load_from_one_text(txt, vocab):
+    txt = purify_row(txt)
+    chars = list(txt)
+    new_txt = []
+    for c in chars:
+        if c in vocab:
+            new_txt.append(vocab[c])
+    return pad_mask([new_txt])
 
 
 def pad_mask(X, maxlen=140):
@@ -68,11 +80,15 @@ def pad_mask(X, maxlen=140):
     return X_out
 
 if __name__ == '__main__':
-    # path = '../data/test.csv'
-    # names = ["class", "id", "time", "query", "user", "data"]
-    # usecols = [0, 5]
-    path = '../data/semeval/train.tsv'
-    names = ["id", "classes", "data"]
-    usecols = [1, 2]
+    path = '../data/training2.csv'
+    names = ["classes", "id", "time", "query", "user", "data"]
+    usecols = [0, 5]
+    # path = '../data/semeval/train.tsv'
+    # names = ["id", "classes", "data"]
+    # usecols = [1, 2]
     x, y, vocab = load_from_file(path, names=names, usecols=usecols)
-    print y
+    # print y
+    row = "~!@#$%^&*()_+`1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}|ASDFGHJKL:ZXCVBNM<>?"
+    print len(row)
+    row = load_from_one_text(row, vocab)
+    # print row
