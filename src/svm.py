@@ -14,7 +14,7 @@ def svm_3_points(n_gram=1):
     logging.info("test accuracy %.4f with params %s" % score)
 
 
-def cv_worker(self, param, x_train, y_train, clf_map):
+def cv_worker(param, x_train, y_train, clf_map):
     k_folder = 3
     splitted_x = np.array_split(x_train, k_folder)
     splitted_y = np.array_split(y_train, k_folder)
