@@ -1,7 +1,7 @@
 from sklearn.naive_bayes import MultinomialNB
 import preprocessing
 import numpy as np
-
+import logging
 
 def naive_bayes_2_points():
     path = '../data/training.csv'
@@ -26,8 +26,8 @@ def naive_bayes_3_points(n_gram=1):
     x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
     clf = MultinomialNB()
     clf.fit(x_train, y_train)
-    print "training finished"
-    print clf.score(x_test, y_test)
+    score = clf.score(x_test, y_test)
+    logging.info("test accuracy %.4f" % score)
     return clf
 
 
@@ -120,6 +120,7 @@ def naive_bayes_3_points_2():
         print diff, clf.score(x_test, y_test)
 
 if __name__ == '__main__':
+    logging.basicConfig(filename='naive.log', level=logging.INFO, format='%(asctime)s %(message)s')
     naive_bayes_3_points(n_gram=1)
     naive_bayes_3_points(n_gram=2)
     naive_bayes_3_points(n_gram=3)
