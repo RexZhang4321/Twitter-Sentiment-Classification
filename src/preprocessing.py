@@ -186,6 +186,22 @@ def get_data_and_label(data):
     return x, y
 
 
+def get_training_and_testing_for_3_points(n_gram=1):
+    path = '../data/semeval/train.tsv'
+    names = ["id", "class", "data"]
+    dt = load_data(path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
+    print "loading finished"
+    dic = generate_dict_for_BOW(dt, n_gram=n_gram)
+    print "dict size:", len(dic)
+    x_train, y_train = get_data_and_label(dt)
+    x_train = generate_BOW(x_train, dic, n_gram=n_gram)
+
+    test_path = '../data/semeval/test.tsv'
+    test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
+    x_test, y_test = get_data_and_label(test_dt)
+    x_test = generate_BOW(x_test, dic, n_gram=n_gram)
+    return x_train,y_train,x_test,y_test
+
 if __name__ == '__main__':
     path = '../data/test.csv'
     names = ["class", "id", "time", "query", "user", "data"]

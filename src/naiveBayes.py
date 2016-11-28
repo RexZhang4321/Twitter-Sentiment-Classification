@@ -21,21 +21,8 @@ def naive_bayes_2_points():
     print clf.score(x_test, y_test)
 
 
-def naive_bayes_3_points_2():
-    path = '../data/semeval/train.tsv'
-    names = ["id", "class", "data"]
-    dt = preprocessing.load_data(path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
-    print "loading finished"
-    dic = preprocessing.generate_dict_for_BOW(dt, n_gram=3)
-    print "dict size:", len(dic)
-    x_train, y_train = preprocessing.get_data_and_label(dt)
-    x_train = preprocessing.generate_BOW(x_train, dic, n_gram=3)
-
-    test_path = '../data/semeval/test.tsv'
-    test_dt = preprocessing.load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
-    x_test, y_test = preprocessing.get_data_and_label(test_dt)
-    x_test = preprocessing.generate_BOW(x_test, dic, n_gram=3)
-
+def naive_bayes_3_points(n_gram=1):
+    x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
     clf = MultinomialNB()
     clf.fit(x_train, y_train)
     print "training finished"
@@ -106,7 +93,7 @@ class MNBC:
         return self.accuracy(y_pred, y_test)
 
 
-def naive_bayes_3_points():
+def naive_bayes_3_points_2():
     path = '../data/training2.csv'
     names = ["class", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
@@ -133,4 +120,4 @@ def naive_bayes_3_points():
 if __name__ == '__main__':
     #naive_bayes_2_points()
     #naive_bayes_3_points()
-    naive_bayes_3_points_2()
+    naive_bayes_3_points(n_gram=3)
