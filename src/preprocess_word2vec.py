@@ -119,7 +119,7 @@ def punctuations_repl(match):
 
 
 def convert2vec(text, maxLen):
-    model = gensim.models.Word2Vec.load_word2vec_format('GoogleNews-vectors-negative300.bin', binary=True)
+    model = gensim.models.Word2Vec.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
     data = np.zeros((len(dt), maxLen, 300))
     rowIndex = 0
     for row in text:
@@ -135,11 +135,11 @@ def convert2vec(text, maxLen):
 
 
 if __name__ == '__main__':
-    path = 'C:/Users/zhang/Downloads/trainingandtestdata/training.csv'
+    path = '../data/training.csv'
     names = ["class", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
     dt = load_data(path, names=names, usecols=usecols)
-    dt = dt[:100000]
+    dt = dt[:10000]
     text = dt['data'].as_matrix()
     labels = dt['class'].as_matrix()
     maxLen = 0
