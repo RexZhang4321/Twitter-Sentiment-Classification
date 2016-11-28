@@ -90,25 +90,48 @@ def build_model(hyparams,
     else:
         net['pool'] = layer.ConcatLayer([net['fwd1']])
     net['dropout1'] = layer.DropoutLayer(net['pool'], p=0.5)
-    net['fwd2'] = layer.LSTMLayer(
-        net['dropout1'],
-        num_units=nhidden,
-        grad_clipping=grad_clip,
-        nonlinearity=lasagne.nonlinearities.tanh,
-        mask_input=net['mask'],
-        ingate=gate_params,
-        forgetgate=gate_params,
-        cell=cell_params,
-        outgate=gate_params,
-        learn_init=True,
-        only_return_final=True
-    )
-    net['dropout2'] = layer.DropoutLayer(net['fwd2'], p=0.6)
+    # net['fwd2'] = layer.LSTMLayer(
+    #     net['dropout1'],
+    #     num_units=nhidden,
+    #     grad_clipping=grad_clip,
+    #     nonlinearity=lasagne.nonlinearities.tanh,
+    #     mask_input=net['mask'],
+    #     ingate=gate_params,
+    #     forgetgate=gate_params,
+    #     cell=cell_params,
+    #     outgate=gate_params,
+    #     learn_init=True,
+    #     only_return_final=True
+    # )
+    # net['fwd2'] = layer.LSTMLayer(
+    #     net['pool'],
+    #     num_units=nhidden,
+    #     grad_clipping=grad_clip,
+    #     nonlinearity=lasagne.nonlinearities.tanh,
+    #     mask_input=net['mask'],
+    #     ingate=gate_params,
+    #     forgetgate=gate_params,
+    #     cell=cell_params,
+    #     outgate=gate_params,
+    #     learn_init=True,
+    #     only_return_final=True
+    # )
+    # net['dropout2'] = layer.DropoutLayer(net['fwd2'], p=0.6)
     net['softmax'] = layer.DenseLayer(
-        net['dropout2'],
+        net['dropout1'],
         num_units=nclasses,
         nonlinearity=lasagne.nonlinearities.softmax
     )
+    # net['softmax'] = layer.DenseLayer(
+    #     net['fwd2'],
+    #     num_units=nclasses,
+    #     nonlinearity=lasagne.nonlinearities.softmax
+    # )
+    # net['softmax'] = layer.DenseLayer(
+    #     net['pool'],
+    #     num_units=nclasses,
+    #     nonlinearity=lasagne.nonlinearities.softmax
+    # )
     ASSUME = {net['input']: (200, 140), net['mask']: (200, 140)}
     logstr = '========== MODEL ========== \n'
     logstr += 'vocab size: %d\n' % V
@@ -271,7 +294,7 @@ if __name__ == '__main__':
     x_train, y_train, vocab = preprocess_char.load_from_file(path, names=names, usecols=usecols)
     print y_train
     hyparams = hparams.HParams()
-    hyparams.bidirectional = False
+    # hyparams.bidirectional = False
     print hyparams
     x_train = x_train[:4000]
     y_train = y_train[:4000]
@@ -281,6 +304,6 @@ if __name__ == '__main__':
             cnt += 1
     print cnt
     clf = learn_model(hyparams, x_train, y_train, vocab)
-    fname = "test1_2point_4000_onedire"
+    fname = "test1_2point_4000"
     write_model_to_file(clf, fname)
     test_model(fname, x_train, y_train, hyparams, vocab)
