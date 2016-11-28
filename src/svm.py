@@ -9,15 +9,20 @@ from sklearn.metrics import accuracy_score
 def svm_3_points(n_gram=1):
     x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
     best_clf, best_score = train_and_select_model(x_train, y_train)
-    logging.info("best validation accuracy %.4f with params %s" % best_score)
+    logging.info("best validation accuracy %.4f" % best_score)
     score = best_clf.score(x_test, y_test)
-    logging.info("test accuracy %.4f with params %s" % score)
+    logging.info("test accuracy %.4f" % score)
 
 
 def cv_worker(param, x_train, y_train, clf_map):
     k_folder = 3
+    x_train = np.array(x_train)
+    y_train = np.array(y_train)
+    print(x_train.shape)
+    print(y_train.shape)
     splitted_x = np.array_split(x_train, k_folder)
     splitted_y = np.array_split(y_train, k_folder)
+
     data_rows = len(y_train)
     data_columns_x = len(x_train[0])
     data_columns_y = 1
@@ -87,4 +92,5 @@ def train_and_select_model(x_train, y_train):
 
 if __name__ == '__main__':
     logging.basicConfig(filename='svm.log', level=logging.INFO, format='%(asctime)s %(message)s')
-    svm_3_points(n_gram=3)
+    svm_3_points(n_gram=1)
+

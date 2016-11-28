@@ -23,6 +23,7 @@ def naive_bayes_2_points():
 
 def naive_bayes_3_points(n_gram=1):
     x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
+    print (x_train.shape)
     clf = MultinomialNB()
     clf.fit(x_train, y_train)
     print "training finished"
@@ -119,5 +120,5 @@ def naive_bayes_3_points_2():
 
 if __name__ == '__main__':
     #naive_bayes_2_points()
-    #naive_bayes_3_points()
-    naive_bayes_3_points(n_gram=3)
+    #naive_bayes_3_points_2()
+    naive_bayes_3_points(n_gram=1)

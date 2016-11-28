@@ -200,7 +200,7 @@ def get_training_and_testing_for_3_points(n_gram=1):
     test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
     x_test, y_test = get_data_and_label(test_dt)
     x_test = generate_BOW(x_test, dic, n_gram=n_gram)
-    return x_train,y_train,x_test,y_test
+    return x_train, y_train, x_test, y_test
 
 if __name__ == '__main__':
     path = '../data/test.csv'
