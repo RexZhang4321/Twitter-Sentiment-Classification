@@ -96,4 +96,6 @@ def train_and_select_model(x_train, y_train):
 if __name__ == '__main__':
     logging.basicConfig(filename='svm.log', level=logging.INFO, format='%(asctime)s %(message)s')
     svm_3_points(n_gram=1)
+    svm_3_points(n_gram=2)
+    svm_3_points(n_gram=3)
 
