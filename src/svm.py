@@ -70,9 +70,9 @@ def cv_worker(param, x_train, y_train, clf_map):
 
 def train_and_select_model(x_train, y_train):
     param_set = [
-        {'kernel': 'rbf', 'C': 5, 'gamma': 0.05},
-        {'kernel': 'rbf', 'C': 2, 'gamma': 0.05},
-        {'kernel': 'rbf', 'C': 2, 'gamma': 0.06},
+        #{'kernel': 'rbf', 'C': 5, 'gamma': 0.05},
+        #{'kernel': 'rbf', 'C': 2, 'gamma': 0.05},
+        #{'kernel': 'rbf', 'C': 2, 'gamma': 0.06},
         {'kernel': 'linear', 'C': 0.09},
         {'kernel': 'linear', 'C': 0.1},
     ]
