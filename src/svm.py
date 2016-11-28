@@ -12,14 +12,14 @@ def svm_3_points(n_gram=1):
     logging.info("best validation accuracy %.4f" % best_score)
     score = best_clf.score(x_test, y_test)
     logging.info("test accuracy %.4f" % score)
+    return best_clf
 
 
 def cv_worker(param, x_train, y_train, clf_map):
     k_folder = 3
     x_train = np.array(x_train)
     y_train = np.array(y_train)
-    print(x_train.shape)
-    print(y_train.shape)
+
     splitted_x = np.array_split(x_train, k_folder)
     splitted_y = np.array_split(y_train, k_folder)
 
@@ -70,8 +70,11 @@ def cv_worker(param, x_train, y_train, clf_map):
 
 def train_and_select_model(x_train, y_train):
     param_set = [
-        {'kernel': 'rbf', 'C': 20, 'gamma': 0.03},
-        {'kernel': 'linear', 'C': 1},
+        {'kernel': 'rbf', 'C': 5, 'gamma': 0.05},
+        {'kernel': 'rbf', 'C': 2, 'gamma': 0.05},
+        {'kernel': 'rbf', 'C': 2, 'gamma': 0.06},
+        {'kernel': 'linear', 'C': 0.09},
+        {'kernel': 'linear', 'C': 0.1},
     ]
     clf_map = dict()
     for param in param_set:
