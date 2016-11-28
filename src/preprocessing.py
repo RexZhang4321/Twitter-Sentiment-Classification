@@ -44,6 +44,7 @@ def parse_row(row):
 def extract_bigram_after_parsing(row):
     return [bg for bg in nltk.bigrams(row)]
 
+
 def extract_trigram_after_parsing(row):
     return [tg for tg in nltk.trigrams(row)]
 
@@ -169,7 +170,7 @@ def generate_BOW(dt, keys, n_gram=1):
 
 
 def get_training_and_testing(data):
-    n_train = int(len(data) * 0.8)
+    n_train = int(len(data) * 0.99)
     x_train = data["data"][:n_train]
     y_train = data["class"][:n_train]
     print pd.DataFrame(y_train).groupby("class").size()

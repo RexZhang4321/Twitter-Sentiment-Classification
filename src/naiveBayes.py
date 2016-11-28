@@ -3,22 +3,23 @@ import preprocessing
 import numpy as np
 import logging
 
-def naive_bayes_2_points():
+
+def naive_bayes_2_points(n_gram=1):
     path = '../data/training.csv'
     names = ["class", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
     dt = preprocessing.load_data(path, {0: -1, 2: 0, 4: 1}, names=names, usecols=usecols)
     print "loading finished"
-    n_records = 5000 # 74.47% in 50000 samples
-    dic = preprocessing.generate_dict_for_BOW(dt[:n_records])
+    n_records = 500000 # 74.47% in 50000 samples
+    dic = preprocessing.generate_dict_for_BOW(dt[:n_records], n_gram=n_gram)
     print "dict size:", len(dic)
     x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing(dt[:n_records])
-    x_train = preprocessing.generate_BOW(x_train, dic)
-    x_test = preprocessing.generate_BOW(x_test, dic)
+    x_train = preprocessing.generate_BOW(x_train, dic, n_gram=n_gram)
+    x_test = preprocessing.generate_BOW(x_test, dic, n_gram=n_gram)
     clf = MultinomialNB()
     clf.fit(x_train, y_train)
-    print "training finished"
-    print clf.score(x_test, y_test)
+    score = clf.score(x_test, y_test)
+    logging.info("test accuracy %.4f" % score)
     return clf
 
 
@@ -121,6 +122,9 @@ def naive_bayes_3_points_2():
 
 if __name__ == '__main__':
     logging.basicConfig(filename='naive.log', level=logging.INFO, format='%(asctime)s %(message)s')
-    naive_bayes_3_points(n_gram=1)
-    naive_bayes_3_points(n_gram=2)
-    naive_bayes_3_points(n_gram=3)
+    naive_bayes_2_points(n_gram=1)
+    naive_bayes_2_points(n_gram=2)
+    naive_bayes_2_points(n_gram=3)
+    #naive_bayes_3_points(n_gram=1)
+    #naive_bayes_3_points(n_gram=2)
+    #naive_bayes_3_points(n_gram=3)
