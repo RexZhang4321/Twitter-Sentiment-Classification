@@ -11,16 +11,16 @@ punctuation = string.punctuation
 stemmer = nltk.stem.porter.PorterStemmer()
 
 
-def load_data(path, names=None, usecols=None):
-    data = pd.read_csv(path, header=None, names=names, usecols=usecols)
-    data['class'] = data['class'].map({0: -1, 2: 0, 4: 1})
+def load_data(path, class_map, sep=",", names=None, usecols=None):
+    data = pd.read_csv(path, sep=sep, header=None, names=names, usecols=usecols)
+    data['class'] = data['class'].map(class_map)
     return data.reindex(np.random.permutation(data.index))
 
 
 def parse_row(row):
     _row = []
     row = re.sub(hash_regex, hash_repl, row)
-    row = re.sub(hndl_regex, hndl_repl, row)
+    row = re.sub(user_regex, '__USERNAME', row)
     row = re.sub(url_regex, "__URL", row)
     for (repl, regx) in emoticons_regex:
         row = re.sub(regx, ' ' + repl + ' ', row)
@@ -29,32 +29,34 @@ def parse_row(row):
     row = re.sub(rpt_regex, rpt_repl, row)
     try:
         for word in word_tokenize(row):
-            # not pretty sure whether we need stopwords
-            word = word.lower()
-            word = stemmer.stem(word)
-            _row.append(word)
-            # if word in stops or len(word) == 1:
-            #         continue
-            # else:
-            #     word = word.lower()
-            #     word = stemmer.stem(word)
-            #     _row.append(word)
+            if word in stops or len(word) <= 2:
+                continue
+            else:
+                if word[0:2] != '__':
+                    word = word.lower()
+                word = stemmer.stem(word)
+                _row.append(word)
     except:
         pass
     return _row
 
 
+def extract_bigram_after_parsing(row):
+    return [bg for bg in nltk.bigrams(row)]
+
+def extract_trigram_after_parsing(row):
+    return [tg for tg in nltk.trigrams(row)]
+
 # Hashtags
 hash_regex = re.compile(r"#(\w+)")
+
+
 def hash_repl(match):
-    return '__HASH_'+match.group(1).upper()
+    return '__HASH_' + match.group(1).upper()
 
 
-# Handels
-hndl_regex = re.compile(r"@(\w+)")
-def hndl_repl(match):
-    return '__HNDL'#_'+match.group(1).upper()
-
+# USERNAME
+user_regex = re.compile(r"@(\w+)")
 
 # URLs
 url_regex = re.compile(r"(http|https|ftp)://[a-zA-Z0-9\./]+")
@@ -66,8 +68,10 @@ word_bound_regex = re.compile(r"\W+")
 
 # Repeating words like hurrrryyyyyy
 rpt_regex = re.compile(r"(.)\1{1,}", re.IGNORECASE)
+
+
 def rpt_repl(match):
-    return match.group(1)+match.group(1)
+    return match.group(1) + match.group(1)
 
 
 # Emoticons
@@ -82,17 +86,10 @@ emoticons = [
 
 
 # Punctuations
-punctuations = [
-        #('',   ['.', ] ),\
-        #('',		[',', ] )	,\
-        #('',		['\'', '\"', ] )	,\
-        ('__PUNC_EXCL',     ['!', ]),\
-        ('__PUNC_QUES',     ['?', ]),\
-        ('__PUNC_ELLP',     ['...', ]),\
-    ]
+punctuations = {'!': '__PUNC_EXCL', '?': '__PUNC_QUES', '...': '__PUNC_ELLP'}
 
 
-# For emoticon regexes
+# For emoticon regex
 def escape_paren(arr):
     return [text.replace(')', '[)}\]]').replace('(', '[({\[]') for text in arr]
 
@@ -108,20 +105,30 @@ emoticons_regex = [(repl, re.compile(regex_union(escape_paren(regx))))
 def punctuations_repl(match):
     text = match.group(0)
     repl = []
-    for (key, parr) in punctuations:
-        for punc in parr:
-            if punc in text:
-                repl.append(key)
-    if (len(repl) > 0):
+    for (key, val) in punctuations.items():
+        if key in text:
+            repl.append(val)
+    if len(repl) > 0:
         return ' ' + ' '.join(repl) + ' '
     else:
         return ' '
 
 
-def generate_dict_for_BOW(dt):
+def generate_dict_for_BOW(dt, n_gram=1):
     word_dic = {}
     for row in dt["data"]:
-        for word in parse_row(row):
+        parsed_row = parse_row(row)
+        if n_gram >= 2:
+            parsed_row_bi = extract_bigram_after_parsing(parsed_row)
+        else:
+            parsed_row_bi = []
+
+        if n_gram >= 3:
+            parsed_row_tri = extract_trigram_after_parsing(parsed_row)
+        else:
+            parsed_row_tri = []
+
+        for word in parsed_row + parsed_row_bi + parsed_row_tri:
             if word in word_dic:
                 word_dic[word] += 1
             else:
@@ -136,11 +143,23 @@ def generate_dict_for_BOW(dt):
     return word_dic.keys()
 
 
-def generate_BOW(dt, keys):
+def generate_BOW(dt, keys, n_gram=1):
     data = []
     for row in dt:
         words = np.zeros(len(keys))
-        for word in parse_row(row):
+        parsed_row = parse_row(row)
+
+        if n_gram >= 2:
+            parsed_row_bi = extract_bigram_after_parsing(parsed_row)
+        else:
+            parsed_row_bi = []
+
+        if n_gram >= 3:
+            parsed_row_tri = extract_trigram_after_parsing(parsed_row)
+        else:
+            parsed_row_tri = []
+
+        for word in parsed_row + parsed_row_bi + parsed_row_tri:
             if word in keys:
                 words[keys.index(word)] += 1
             else:
@@ -158,6 +177,30 @@ def get_training_and_testing(data):
     y_test = data["class"][n_train:]
     print pd.DataFrame(y_test).groupby("class").size()
     return x_train.values, y_train.values, x_test.values, y_test.values
+
+
+def get_data_and_label(data):
+    n = len(data)
+    x = data["data"][:n]
+    y = data["class"][:n]
+    return x, y
+
+
+def get_training_and_testing_for_3_points(n_gram=1):
+    path = '../data/semeval/train.tsv'
+    names = ["id", "class", "data"]
+    dt = load_data(path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
+    print "loading finished"
+    dic = generate_dict_for_BOW(dt, n_gram=n_gram)
+    print "dict size:", len(dic)
+    x_train, y_train = get_data_and_label(dt)
+    x_train = generate_BOW(x_train, dic, n_gram=n_gram)
+
+    test_path = '../data/semeval/test.tsv'
+    test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
+    x_test, y_test = get_data_and_label(test_dt)
+    x_test = generate_BOW(x_test, dic, n_gram=n_gram)
+    return x_train, y_train, x_test, y_test
 
 if __name__ == '__main__':
     path = '../data/test.csv'
