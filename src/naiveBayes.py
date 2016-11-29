@@ -69,4 +69,5 @@ if __name__ == '__main__':
     naive_bayes_3_points(n_gram=1)
     naive_bayes_3_points(n_gram=2)
     naive_bayes_3_points(n_gram=3)
+    naive_bayes_2_points(n_gram=1, use_bern=True)
     naive_bayes_2_points(n_gram=1)
