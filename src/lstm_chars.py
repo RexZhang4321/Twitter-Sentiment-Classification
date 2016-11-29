@@ -6,7 +6,6 @@ import lasagne
 import lasagne.layers as layer
 from lasagne.layers import get_output_shape
 import hparams
-from evaluate import ConfusionMatrix
 from collections import OrderedDict
 import time
 import preprocess_char
@@ -232,12 +231,18 @@ def test_model(model_fname, x_test, y_test, hyparams, vocab):
     # lasagne.layers.set_all_param_values(clf.values(), params)
     print "model built."
 
+    print 1
     test_output = lasagne.layers.get_output(clf['softmax'], deterministic=True)
+    print 2
     val_cost_func = lasagne.objectives.categorical_crossentropy(test_output, y).mean()
+    print 3
     preds = T.argmax(test_output, axis=1)
+    print 4
     val_acc_func = T.mean(T.eq(preds, y), dtype=theano.config.floatX)
+    print 5
     val_func = theano.function([X, M, y], [val_cost_func, val_acc_func, preds], allow_input_downcast=True)
 
+    print 6
     test_loss, test_acc, test_pred = val_func(x_test[:, :, 0], x_test[:, :, 1], y_test)
     print test_loss, test_acc
     cnt0 = 0
@@ -272,19 +277,20 @@ def read_model_from_file(model, fname):
     lasagne.layers.set_all_param_values(model.values(), data)
 
 if __name__ == '__main__':
-    path = '../data/training2.csv'
+    path = '../data/training.csv'
     print "loading data..."
-    with open('../data/semeval/semeval_label.pkl', 'r') as fp:
+    with open('../model/senti_vocab.pkl', 'r') as fp:
         vocab = pickle.load(fp)
+        print vocab
     x_train, y_train = preprocess_char.load_from_file_with_vocab(path, vocab, mode='senti')
     hyparams = hparams.HParams()
     hyparams.nepochs = 1
     hyparams.embedding_dim = 100
     # hyparams.bidirectional = False
     print hyparams
-    clf = learn_model(hyparams, x_train, y_train, vocab)
+    # clf = learn_model(hyparams, x_train, y_train, vocab)
     fname = "test5_2point_1.6M_1"
-    write_model_to_file(clf, fname)
+    # write_model_to_file(clf, fname)
     x_train = x_train[:4000]
     y_train = y_train[:4000]
     cnt = 0

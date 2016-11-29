@@ -9,6 +9,7 @@ url_regex = re.compile(r"(http|https|ftp)://[a-zA-Z0-9\./]+")
 
 
 def load_data(path, names=None, usecols=None, mode='semeval2'):
+    np.random.seed(1234)
     if mode == 'semeval2':
         names = ["id", "classes", "data"]
         usecols = [1, 2]
@@ -59,7 +60,7 @@ def preprocess_data(data):
 
 
 def load_from_file(path, names=None, usecols=None, mode='semeval2'):
-    dt = load_data(path, names=names, usecols=usecols, mode='semeval2')
+    dt = load_data(path, names=names, usecols=usecols, mode=mode)
     print dt
     y = dt['classes'].values
     y = np.array(y, dtype=np.int64)
@@ -102,4 +103,8 @@ def pad_mask(X, maxlen=140):
     return X_out
 
 if __name__ == '__main__':
-    pass
+    x, y, vocab = load_from_file("../data/training2.csv", mode='senti')
+    print x
+    print y
+    print len(vocab)
+    print vocab
