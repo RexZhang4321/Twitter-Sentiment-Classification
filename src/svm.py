@@ -4,14 +4,45 @@ import numpy as np
 import logging
 import threading
 from sklearn.metrics import accuracy_score
+import os
+import pickle
+
+
+def svm_2_points(n_gram=1):
+    model_file_name = 'svm_' + str(n_gram) + '_gram_' + '2_points' + '.pkl'
+    model_file_path = os.path.join("../model", model_file_name)
+    if os.path.isfile(model_file_path):
+        logging.info("Found existing model trained with file: %s" % model_file_name)
+        with open(model_file_path, 'rb') as model_file:
+            best_clf = pickle.load(model_file)
+    else:
+        x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_2_points(n_gram=n_gram)
+        best_clf, best_score = train_and_select_model(x_train, y_train)
+        logging.info("best validation accuracy %.4f" % best_score)
+        with open(model_file_path, 'wb') as output:
+            pickle.dump(best_clf, output)
+
+    score = best_clf.score(x_test, y_test)
+    logging.info("test accuracy %.4f with %s gram trained by svm for 2 points" % (score, str(n_gram)))
+    return best_clf
 
 
 def svm_3_points(n_gram=1):
-    x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
-    best_clf, best_score = train_and_select_model(x_train, y_train)
-    logging.info("best validation accuracy %.4f" % best_score)
+    model_file_name = 'svm_' + str(n_gram) + '_gram_' + '3_points' + '.pkl'
+    model_file_path = os.path.join("../model", model_file_name)
+    if os.path.isfile(model_file_path):
+        logging.info("Found existing model trained with file: %s" % model_file_name)
+        with open(model_file_path, 'rb') as model_file:
+            best_clf = pickle.load(model_file)
+    else:
+        x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
+        best_clf, best_score = train_and_select_model(x_train, y_train)
+        logging.info("best validation accuracy %.4f" % best_score)
+        with open(model_file_path, 'wb') as output:
+            pickle.dump(best_clf, output)
+
     score = best_clf.score(x_test, y_test)
-    logging.info("test accuracy %.4f" % score)
+    logging.info("test accuracy %.4f with %s gram trained by svm for 3 points" % (score, str(n_gram)))
     return best_clf
 
 
@@ -70,9 +101,9 @@ def cv_worker(param, x_train, y_train, clf_map):
 
 def train_and_select_model(x_train, y_train):
     param_set = [
-        {'kernel': 'rbf', 'C': 5, 'gamma': 0.05},
-        {'kernel': 'rbf', 'C': 2, 'gamma': 0.05},
-        {'kernel': 'rbf', 'C': 2, 'gamma': 0.06},
+        #{'kernel': 'rbf', 'C': 5, 'gamma': 0.05},
+        #{'kernel': 'rbf', 'C': 2, 'gamma': 0.05},
+        #{'kernel': 'rbf', 'C': 2, 'gamma': 0.06},
         {'kernel': 'linear', 'C': 0.09},
         {'kernel': 'linear', 'C': 0.1},
     ]
@@ -94,8 +125,9 @@ def train_and_select_model(x_train, y_train):
 
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='svm.log', level=logging.INFO, format='%(asctime)s %(message)s')
+    logging.basicConfig(filename='../running_log/svm.log', level=logging.INFO, format='%(asctime)s %(message)s')
     svm_3_points(n_gram=1)
     svm_3_points(n_gram=2)
     svm_3_points(n_gram=3)
+    svm_2_points(n_gram=1)
 
