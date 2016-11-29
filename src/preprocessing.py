@@ -205,18 +205,16 @@ def get_training_and_testing_for_2_points(n_gram=1, use_bern=False):
     x_train, y_train = get_data_and_label(dt[:n_records])
     x_train = generate_BOW(x_train, dic, n_gram=n_gram, use_bern=use_bern)
 
-    test_path = '../data/testing.csv'
-    test_dt = load_data(test_path, {0: -1, 2: 0, 4: 1}, names=names, usecols=usecols)
+    test_path = '../data/testing.tsv'
+    test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
     x_test, y_test = get_data_and_label(test_dt)
     x_test = generate_BOW(x_test, dic, n_gram=n_gram, use_bern=use_bern)
     return x_train, y_train, x_test, y_test, dic
 
 
 def get_testing_for_2_points(dic, n_gram=1, use_bern=False):
-    test_path = '../data/testing.csv'
-    names = ["class", "id", "time", "query", "user", "data"]
-    usecols = [0, 5]
-    test_dt = load_data(test_path, {0: -1, 2: 0, 4: 1}, names=names, usecols=usecols)
+    test_path = '../data/testing.tsv'
+    test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
     x_test, y_test = get_data_and_label(test_dt)
     x_test = generate_BOW(x_test, dic, n_gram=n_gram, use_bern=use_bern)
     return x_test, y_test
