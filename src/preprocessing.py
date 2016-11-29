@@ -241,6 +241,7 @@ def get_training_and_testing_for_3_points(n_gram=1, use_bern=False):
 
 def get_testing_for_3_points(dic, n_gram=1, use_bern=False):
     test_path = '../data/semeval/test.tsv'
+    names = ["id", "class", "data"]
     test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
     x_test, y_test = get_data_and_label(test_dt)
     x_test = generate_BOW(x_test, dic, n_gram=n_gram, use_bern=use_bern)
