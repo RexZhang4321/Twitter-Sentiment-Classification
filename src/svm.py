@@ -9,7 +9,7 @@ import pickle
 
 
 def svm_2_points(n_gram=1):
-    model_file_name = 'svm_' + n_gram + '_gram_' + '2_points' + '.pkl'
+    model_file_name = 'svm_' + str(n_gram) + '_gram_' + '2_points' + '.pkl'
     if os.path.isfile(model_file_name):
         logging.info("Found existing model trained with file: %s" % model_file_name)
         with open(model_file_name, 'rb') as model_file:
@@ -22,12 +22,12 @@ def svm_2_points(n_gram=1):
             pickle.dump(best_clf, output)
 
     score = best_clf.score(x_test, y_test)
-    logging.info("test accuracy %.4f with %s gram trained by svm for 2 points" % (score, n_gram))
+    logging.info("test accuracy %.4f with %s gram trained by svm for 2 points" % (score, str(n_gram)))
     return best_clf
 
 
 def svm_3_points(n_gram=1):
-    model_file_name = 'svm_' + n_gram + '_gram_' + '3_points' + '.pkl'
+    model_file_name = 'svm_' + str(n_gram) + '_gram_' + '3_points' + '.pkl'
     if os.path.isfile(model_file_name):
         logging.info("Found existing model trained with file: %s" % model_file_name)
         with open(model_file_name, 'rb') as model_file:
@@ -40,7 +40,7 @@ def svm_3_points(n_gram=1):
             pickle.dump(best_clf, output)
 
     score = best_clf.score(x_test, y_test)
-    logging.info("test accuracy %.4f with %s gram trained by svm for 3 points" % (score, n_gram))
+    logging.info("test accuracy %.4f with %s gram trained by svm for 3 points" % (score, str(n_gram)))
     return best_clf
 
 

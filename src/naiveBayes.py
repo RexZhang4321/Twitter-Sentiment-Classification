@@ -11,7 +11,7 @@ def naive_bayes_2_points(n_gram=1, use_bern=False):
         file_name = "bern"
     else:
         file_name = "multi"
-    model_file_name = 'naive_bayes_' + n_gram + '_gram_' + file_name + '2_points' + '.pkl'
+    model_file_name = 'naive_bayes_' + str(n_gram) + '_gram_' + file_name + '2_points' + '.pkl'
 
     if os.path.isfile(model_file_name):
         logging.info("Found existing model trained with file: %s" % model_file_name)
@@ -30,7 +30,7 @@ def naive_bayes_2_points(n_gram=1, use_bern=False):
             pickle.dump(clf, output)
 
     score = clf.score(x_test, y_test)
-    logging.info("test accuracy %.4f with %s gram %s trained by naive bayes for 2 points" % (score, n_gram, file_name))
+    logging.info("test accuracy %.4f with %s gram %s trained by naive bayes for 2 points" % (score, str(n_gram), file_name))
     return clf
 
 
@@ -39,7 +39,7 @@ def naive_bayes_3_points(n_gram=1, use_bern=False):
         file_name = "bern"
     else:
         file_name = "multi"
-    model_file_name = 'naive_bayes_' + n_gram + '_gram_' + file_name + '3_points' + '.pkl'
+    model_file_name = 'naive_bayes_' + str(n_gram) + '_gram_' + file_name + '3_points' + '.pkl'
 
     if os.path.isfile(model_file_name):
         logging.info("Found existing model trained with file: %s" % model_file_name)
@@ -58,7 +58,7 @@ def naive_bayes_3_points(n_gram=1, use_bern=False):
             pickle.dump(clf, output)
 
     score = clf.score(x_test, y_test)
-    logging.info("test accuracy %.4f with %s gram %s trained by naive bayes for 3 points" % (score, n_gram, file_name))
+    logging.info("test accuracy %.4f with %s gram %s trained by naive bayes for 3 points" % (score, str(n_gram), file_name))
     return clf
 
 if __name__ == '__main__':
