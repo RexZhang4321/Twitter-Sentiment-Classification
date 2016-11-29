@@ -119,13 +119,9 @@ def punctuations_repl(match):
 
 
 def convert2vec(text, maxLen):
-<<<<<<< HEAD
-    model = gensim.models.Word2Vec.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
-=======
     print "loading word2vec bin..."
     model = gensim.models.Word2Vec.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
     print "load finished"
->>>>>>> 13e3cd563578d8f2f8c0dc01a67d6793be72ec33
     data = np.zeros((len(dt), maxLen, 300))
     rowIndex = 0
     for row in text:
