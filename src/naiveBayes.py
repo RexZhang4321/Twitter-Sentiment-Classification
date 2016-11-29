@@ -62,7 +62,7 @@ def naive_bayes_3_points(n_gram=1, use_bern=False):
     return clf
 
 if __name__ == '__main__':
-    logging.basicConfig(filename='naive.log', level=logging.INFO, format='%(asctime)s %(message)s')
+    logging.basicConfig(filename='../running_log/naive.log', level=logging.INFO, format='%(asctime)s %(message)s')
     naive_bayes_3_points(n_gram=1, use_bern=True)
     naive_bayes_3_points(n_gram=2, use_bern=True)
     naive_bayes_3_points(n_gram=3, use_bern=True)
