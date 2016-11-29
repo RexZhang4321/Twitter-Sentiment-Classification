@@ -62,7 +62,7 @@ def naive_bayes_3_points(n_gram=1, use_bern=False):
         else:
             clf = MultinomialNB()
         x_train, y_train, x_test, y_test, dic = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram,
-                                                                                               use_bern=use_bern)
+                                                                                                    use_bern=use_bern)
         clf.fit(x_train, y_train)
         with open(model_file_path, 'wb') as output:
             model = dict()
