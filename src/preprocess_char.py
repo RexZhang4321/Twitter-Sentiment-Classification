@@ -8,13 +8,26 @@ hndl_regex = re.compile(r"@(\w+)")
 url_regex = re.compile(r"(http|https|ftp)://[a-zA-Z0-9\./]+")
 
 
-def load_data(path, names=None, usecols=None):
-    # data = pd.read_csv(path, delimiter="\t", header=None, names=names, usecols=usecols)
-    data = pd.read_csv(path, header=None, names=names, usecols=usecols)
-    # data['class'] = data['class'].map({0: 0, 2: 0, 4: 1})
-    # data = data[~data['classes'].str.contains('neutral')]
-    # data = data.replace({'classes': {'negative': 0, 'positive': 1}})
-    data['classes'] = data['classes'].map({0: 0, 4: 1})
+def load_data(path, names=None, usecols=None, mode='semeval2'):
+    if mode == 'semeval2':
+        names = ["id", "classes", "data"]
+        usecols = [1, 2]
+        data = pd.read_csv(path, delimiter="\t", header=None, names=names, usecols=usecols)
+        data = data[~data['classes'].str.contains('neutral')]
+        data = data.replace({'classes': {'negative': 0, 'positive': 1}})
+    elif mode == 'semeval3':
+        names = ["id", "classes", "data"]
+        usecols = [1, 2]
+        data = pd.read_csv(path, delimiter="\t", header=None, names=names, usecols=usecols)
+        data = data.replace({'classes': {'negative': 0, 'neutral': 1, 'positive': 2}})
+    elif mode == 'senti':
+        names = ["classes", "id", "time", "query", "user", "data"]
+        usecols = [0, 5]
+        data = pd.read_csv(path, header=None, names=names, usecols=usecols)
+        data['classes'] = data['classes'].map({0: 0, 4: 1})
+    else:
+        print "unrecognized dataset. abort"
+        exit(1)
     return data.reindex(np.random.permutation(data.index))
 
 
@@ -45,8 +58,8 @@ def preprocess_data(data):
     return new_data, vocab
 
 
-def load_from_file(path, names=None, usecols=None):
-    dt = load_data(path, names=names, usecols=usecols)
+def load_from_file(path, names=None, usecols=None, mode='semeval2'):
+    dt = load_data(path, names=names, usecols=usecols, mode='semeval2')
     print dt
     y = dt['classes'].values
     y = np.array(y, dtype=np.int64)
@@ -66,6 +79,15 @@ def load_from_one_text(txt, vocab):
     return pad_mask([new_txt])
 
 
+def load_from_file_with_vocab(path, vocab, names=None, usecols=None, mode='semeval2'):
+    dt = load_data(path, names=names, usecols=usecols, mode=mode)
+    print dt
+    y = dt['classes'].values
+    x = dt['data'].values
+    x = [load_from_one_text(row, vocab)[0] for row in x]
+    return np.array(x), y
+
+
 def pad_mask(X, maxlen=140):
     N = len(X)
     X_out = np.zeros((N, maxlen, 2), dtype=np.int32)
@@ -80,15 +102,4 @@ def pad_mask(X, maxlen=140):
     return X_out
 
 if __name__ == '__main__':
-    path = '../data/training2.csv'
-    names = ["classes", "id", "time", "query", "user", "data"]
-    usecols = [0, 5]
-    # path = '../data/semeval/train.tsv'
-    # names = ["id", "classes", "data"]
-    # usecols = [1, 2]
-    x, y, vocab = load_from_file(path, names=names, usecols=usecols)
-    # print y
-    row = "~!@#$%^&*()_+`1234567890-=qwertyuiop[]asdfghjkl;'zxcvbnm,./QWERTYUIOP{}|ASDFGHJKL:ZXCVBNM<>?"
-    print len(row)
-    row = load_from_one_text(row, vocab)
-    # print row
+    pass
