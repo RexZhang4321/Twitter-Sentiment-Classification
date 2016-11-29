@@ -9,11 +9,12 @@ url_regex = re.compile(r"(http|https|ftp)://[a-zA-Z0-9\./]+")
 
 
 def load_data(path, names=None, usecols=None):
-    # data = pd.read_csv(path, delimiter="\t", header=None, names=names, usecols=usecols)
+    #data = pd.read_csv(path, delimiter="\t", header=None, names=names, usecols=usecols)
     data = pd.read_csv(path, header=None, names=names, usecols=usecols)
     # data['class'] = data['class'].map({0: 0, 2: 0, 4: 1})
-    # data = data[~data['classes'].str.contains('neutral')]
-    # data = data.replace({'classes': {'negative': 0, 'positive': 1}})
+    #data = data[~data['classes'].str.contains('neutral')]
+    #data = data.replace({'classes': {'negative': 0, 'positive': 1}})
+    #data = data.replace({'classes': {'negative': 0, 'neutral': 1, 'positive': 2}})
     data['classes'] = data['classes'].map({0: 0, 4: 1})
     return data.reindex(np.random.permutation(data.index))
 
@@ -64,6 +65,15 @@ def load_from_one_text(txt, vocab):
         if c in vocab:
             new_txt.append(vocab[c])
     return pad_mask([new_txt])
+
+
+def load_from_file_with_vocab(path, vocab, names=None, usecols=None):
+    dt = load_data(path, names=names, usecols=usecols)
+    print dt
+    y = dt['classes'].values
+    x = dt['data'].values
+    x = [load_from_one_text(row, vocab)[0] for row in x]
+    return np.array(x), y
 
 
 def pad_mask(X, maxlen=140):

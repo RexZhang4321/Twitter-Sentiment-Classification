@@ -90,35 +90,22 @@ def build_model(hyparams,
     else:
         net['pool'] = layer.ConcatLayer([net['fwd1']])
     net['dropout1'] = layer.DropoutLayer(net['pool'], p=0.5)
-    # net['fwd2'] = layer.LSTMLayer(
-    #     net['dropout1'],
-    #     num_units=nhidden,
-    #     grad_clipping=grad_clip,
-    #     nonlinearity=lasagne.nonlinearities.tanh,
-    #     mask_input=net['mask'],
-    #     ingate=gate_params,
-    #     forgetgate=gate_params,
-    #     cell=cell_params,
-    #     outgate=gate_params,
-    #     learn_init=True,
-    #     only_return_final=True
-    # )
-    # net['fwd2'] = layer.LSTMLayer(
-    #     net['pool'],
-    #     num_units=nhidden,
-    #     grad_clipping=grad_clip,
-    #     nonlinearity=lasagne.nonlinearities.tanh,
-    #     mask_input=net['mask'],
-    #     ingate=gate_params,
-    #     forgetgate=gate_params,
-    #     cell=cell_params,
-    #     outgate=gate_params,
-    #     learn_init=True,
-    #     only_return_final=True
-    # )
-    # net['dropout2'] = layer.DropoutLayer(net['fwd2'], p=0.6)
-    net['softmax'] = layer.DenseLayer(
+    net['fwd2'] = layer.LSTMLayer(
         net['dropout1'],
+        num_units=nhidden,
+        grad_clipping=grad_clip,
+        nonlinearity=lasagne.nonlinearities.tanh,
+        mask_input=net['mask'],
+        ingate=gate_params,
+        forgetgate=gate_params,
+        cell=cell_params,
+        outgate=gate_params,
+        learn_init=True,
+        only_return_final=True
+    )
+    net['dropout2'] = layer.DropoutLayer(net['fwd2'], p=0.6)
+    net['softmax'] = layer.DenseLayer(
+        net['dropout2'],
         num_units=nclasses,
         nonlinearity=lasagne.nonlinearities.softmax
     )
@@ -231,8 +218,8 @@ def learn_model(hyparams, x_train, y_train, vocab):
         print "Epoch {} of {} took {:.3f}s\n".format(
             epoch + 1, n_epochs, time.time() - start_time)
 
-    test_loss, test_acc, _ = val_fn(x_train[:, :, 0], x_train[:, :, 1], y_train)
-    print test_loss, test_acc
+    # test_loss, test_acc, _ = val_fn(x_train[:, :, 0], x_train[:, :, 1], y_train)
+    # print test_loss, test_acc
     return network
 
 
@@ -263,6 +250,17 @@ def test_model(model_fname, x_test, y_test, hyparams, vocab):
 
     test_loss, test_acc, test_pred = val_func(x_test[:, :, 0], x_test[:, :, 1], y_test)
     print test_loss, test_acc
+    cnt0 = 0
+    cnt1 = 0
+    cnt2 = 0
+    for i in test_pred:
+        if i == 0:
+            cnt0 += 1
+        if i == 1:
+            cnt1 += 1
+        if i == 2:
+            cnt2 += 1
+    print cnt0, cnt1, cnt2
     while True:
         txt = raw_input("Type a tweet: ")
         txt = preprocess_char.load_from_one_text(txt, vocab)
@@ -284,18 +282,28 @@ def read_model_from_file(model, fname):
     lasagne.layers.set_all_param_values(model.values(), data)
 
 if __name__ == '__main__':
-    path = '../data/training2.csv'
+    path = '../data/training.csv'
     names = ["classes", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
-    # path = '../data/semeval/train.tsv'
-    # names = ["id", "classes", "data"]
-    # usecols = [1, 2]
+    '''
+    path = '../data/semeval/train.tsv'
+    path2 = '../data/semeval/test.tsv'
+    names = ["id", "classes", "data"]
+    usecols = [1, 2]
+    '''
     print "loading data..."
     x_train, y_train, vocab = preprocess_char.load_from_file(path, names=names, usecols=usecols)
+    # x_train, y_train = preprocess_char.load_from_file_with_vocab(path2, vocab, names=names, usecols=usecols)
+    print x_train
     print y_train
     hyparams = hparams.HParams()
+    hyparams.nepochs = 1
+    hyparams.embedding_dim = 100
     # hyparams.bidirectional = False
     print hyparams
+    clf = learn_model(hyparams, x_train, y_train, vocab)
+    fname = "test5_2point_1.6M_1"
+    write_model_to_file(clf, fname)
     x_train = x_train[:4000]
     y_train = y_train[:4000]
     cnt = 0
@@ -303,7 +311,4 @@ if __name__ == '__main__':
         if i == 0:
             cnt += 1
     print cnt
-    clf = learn_model(hyparams, x_train, y_train, vocab)
-    fname = "test1_2point_4000"
-    write_model_to_file(clf, fname)
     test_model(fname, x_train, y_train, hyparams, vocab)
