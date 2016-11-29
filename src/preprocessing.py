@@ -195,20 +195,31 @@ def get_data_and_label(data):
 
 def get_training_and_testing_for_2_points(n_gram=1, use_bern=False):
     path = '../data/training.csv'
-    names = ["id", "class", "data"]
-    dt = load_data(path, {0: -1, 2: 0, 4: 1}, sep="\t", names=names)
+    names = ["class", "id", "time", "query", "user", "data"]
+    usecols = [0, 5]
+    dt = load_data(path, {0: -1, 2: 0, 4: 1}, names=names, usecols=usecols)
     print "loading finished"
-    n_records = 400000  # 74.47% in 50000 samples
+    n_records = 200000  # 74.47% in 50000 samples
     dic = generate_dict_for_BOW(dt[:n_records], n_gram=n_gram)
     print "dict size:", len(dic)
     x_train, y_train = get_data_and_label(dt[:n_records])
     x_train = generate_BOW(x_train, dic, n_gram=n_gram, use_bern=use_bern)
 
-    test_path = '../data/testing.csv'
-    test_dt = load_data(test_path, {0: -1, 2: 0, 4: 1}, sep="\t", names=names)
+    test_path = '../data/testing.tsv'
+    test_names = ["id", "class", "data"]
+    test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=test_names)
     x_test, y_test = get_data_and_label(test_dt)
-    x_test = generate_BOW(x_test, dic, n_gram=n_gram, useBern=use_bern)
-    return x_train, y_train, x_test, y_test
+    x_test = generate_BOW(x_test, dic, n_gram=n_gram, use_bern=use_bern)
+    return x_train, y_train, x_test, y_test, dic
+
+
+def get_testing_for_2_points(dic, n_gram=1, use_bern=False):
+    test_path = '../data/testing.tsv'
+    test_names = ["id", "class", "data"]
+    test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=test_names)
+    x_test, y_test = get_data_and_label(test_dt)
+    x_test = generate_BOW(x_test, dic, n_gram=n_gram, use_bern=use_bern)
+    return x_test, y_test
 
 
 def get_training_and_testing_for_3_points(n_gram=1, use_bern=False):
@@ -225,7 +236,16 @@ def get_training_and_testing_for_3_points(n_gram=1, use_bern=False):
     test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
     x_test, y_test = get_data_and_label(test_dt)
     x_test = generate_BOW(x_test, dic, n_gram=n_gram, use_bern=use_bern)
-    return x_train, y_train, x_test, y_test
+    return x_train, y_train, x_test, y_test, dic
+
+
+def get_testing_for_3_points(dic, n_gram=1, use_bern=False):
+    test_path = '../data/semeval/test.tsv'
+    names = ["id", "class", "data"]
+    test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
+    x_test, y_test = get_data_and_label(test_dt)
+    x_test = generate_BOW(x_test, dic, n_gram=n_gram, use_bern=use_bern)
+    return x_test, y_test
 
 if __name__ == '__main__':
     path = '../data/test.csv'

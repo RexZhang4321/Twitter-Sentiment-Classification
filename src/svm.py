@@ -14,13 +14,19 @@ def svm_2_points(n_gram=1):
     if os.path.isfile(model_file_path):
         logging.info("Found existing model trained with file: %s" % model_file_name)
         with open(model_file_path, 'rb') as model_file:
-            best_clf = pickle.load(model_file)
+            model = pickle.load(model_file)
+            best_clf = model["clf"]
+            dic = model["dic"]
+            x_test, y_test = preprocessing.get_testing_for_2_points(dic, n_gram=n_gram)
     else:
-        x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_2_points(n_gram=n_gram)
+        x_train, y_train, x_test, y_test, dic = preprocessing.get_training_and_testing_for_2_points(n_gram=n_gram)
         best_clf, best_score = train_and_select_model(x_train, y_train)
         logging.info("best validation accuracy %.4f" % best_score)
         with open(model_file_path, 'wb') as output:
-            pickle.dump(best_clf, output)
+            model = dict()
+            model["clf"] = best_clf
+            model["dic"] = dic
+            pickle.dump(model, output)
 
     score = best_clf.score(x_test, y_test)
     logging.info("test accuracy %.4f with %s gram trained by svm for 2 points" % (score, str(n_gram)))
@@ -33,13 +39,19 @@ def svm_3_points(n_gram=1):
     if os.path.isfile(model_file_path):
         logging.info("Found existing model trained with file: %s" % model_file_name)
         with open(model_file_path, 'rb') as model_file:
-            best_clf = pickle.load(model_file)
+            model = pickle.load(model_file)
+            best_clf = model["clf"]
+            dic = model["dic"]
+            x_test, y_test = preprocessing.get_testing_for_3_points(dic, n_gram=n_gram)
     else:
-        x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
+        x_train, y_train, x_test, y_test, dic = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
         best_clf, best_score = train_and_select_model(x_train, y_train)
         logging.info("best validation accuracy %.4f" % best_score)
         with open(model_file_path, 'wb') as output:
-            pickle.dump(best_clf, output)
+            model = dict()
+            model["clf"] = best_clf
+            model["dic"] = dic
+            pickle.dump(model, output)
 
     score = best_clf.score(x_test, y_test)
     logging.info("test accuracy %.4f with %s gram trained by svm for 3 points" % (score, str(n_gram)))
