@@ -12,7 +12,7 @@ def naive_bayes_2_points(n_gram=1, use_bern=False):
     else:
         model_type = "multi"
     model_file_name = 'naive_bayes_' + str(n_gram) + '_gram_' + model_type + '_2_points' + '.pkl'
-    model_file_path = os.join("../model", model_file_name)
+    model_file_path = os.path.join("../model", model_file_name)
     if os.path.isfile(model_file_path):
         logging.info("Found existing model trained with file: %s" % model_file_name)
         with open(model_file_path, 'rb') as model_file:
@@ -40,7 +40,7 @@ def naive_bayes_3_points(n_gram=1, use_bern=False):
     else:
         model_type = "multi"
     model_file_name = 'naive_bayes_' + str(n_gram) + '_gram_' + model_type + '_3_points' + '.pkl'
-    model_file_path = os.join("../model", model_file_name)
+    model_file_path = os.path.join("../model", model_file_name)
     if os.path.isfile(model_file_path):
         logging.info("Found existing model trained with file: %s" % model_file_name)
         with open(model_file_path, 'rb') as model_file:
