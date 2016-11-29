@@ -208,7 +208,15 @@ def get_training_and_testing_for_2_points(n_gram=1, use_bern=False):
     test_dt = load_data(test_path, {0: -1, 2: 0, 4: 1}, sep="\t", names=names)
     x_test, y_test = get_data_and_label(test_dt)
     x_test = generate_BOW(x_test, dic, n_gram=n_gram, useBern=use_bern)
-    return x_train, y_train, x_test, y_test
+    return x_train, y_train, x_test, y_test, dic
+
+
+def get_testing_for_2_points(dic, n_gram=1, use_bern=False):
+    test_path = '../data/testing.csv'
+    test_dt = load_data(test_path, {0: -1, 2: 0, 4: 1}, sep="\t", names=names)
+    x_test, y_test = get_data_and_label(test_dt)
+    x_test = generate_BOW(x_test, dic, n_gram=n_gram, useBern=use_bern)
+    return x_test, y_test
 
 
 def get_training_and_testing_for_3_points(n_gram=1, use_bern=False):
@@ -225,7 +233,15 @@ def get_training_and_testing_for_3_points(n_gram=1, use_bern=False):
     test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
     x_test, y_test = get_data_and_label(test_dt)
     x_test = generate_BOW(x_test, dic, n_gram=n_gram, use_bern=use_bern)
-    return x_train, y_train, x_test, y_test
+    return x_train, y_train, x_test, y_test, dic
+
+
+def get_testing_for_3_points(dic, n_gram=1, use_bern=False):
+    test_path = '../data/semeval/test.tsv'
+    test_dt = load_data(test_path, {"negative": -1, "neutral": 0, "positive": 1}, sep="\t", names=names)
+    x_test, y_test = get_data_and_label(test_dt)
+    x_test = generate_BOW(x_test, dic, n_gram=n_gram, use_bern=use_bern)
+    return x_test, y_test
 
 if __name__ == '__main__':
     path = '../data/test.csv'
