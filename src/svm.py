@@ -11,12 +11,12 @@ import pickle
 def svm_2_points(n_gram=1):
     model_file_name = 'svm_' + str(n_gram) + '_gram_' + '2_points' + '.pkl'
     model_file_path = os.path.join("../model", model_file_name)
+    x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_2_points(n_gram=n_gram)
     if os.path.isfile(model_file_path):
         logging.info("Found existing model trained with file: %s" % model_file_name)
         with open(model_file_path, 'rb') as model_file:
             best_clf = pickle.load(model_file)
     else:
-        x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_2_points(n_gram=n_gram)
         best_clf, best_score = train_and_select_model(x_train, y_train)
         logging.info("best validation accuracy %.4f" % best_score)
         with open(model_file_path, 'wb') as output:
@@ -30,12 +30,12 @@ def svm_2_points(n_gram=1):
 def svm_3_points(n_gram=1):
     model_file_name = 'svm_' + str(n_gram) + '_gram_' + '3_points' + '.pkl'
     model_file_path = os.path.join("../model", model_file_name)
+    x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
     if os.path.isfile(model_file_path):
         logging.info("Found existing model trained with file: %s" % model_file_name)
         with open(model_file_path, 'rb') as model_file:
             best_clf = pickle.load(model_file)
     else:
-        x_train, y_train, x_test, y_test = preprocessing.get_training_and_testing_for_3_points(n_gram=n_gram)
         best_clf, best_score = train_and_select_model(x_train, y_train)
         logging.info("best validation accuracy %.4f" % best_score)
         with open(model_file_path, 'wb') as output:
