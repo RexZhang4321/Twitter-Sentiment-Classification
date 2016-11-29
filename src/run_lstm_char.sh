@@ -1,0 +1,1 @@
+THEANO_FLAGS=cuda.root=/usr/local/cuda,gcc.cxxflags='-march=x86-64',device=gpu,floatX=float32 python ./lstm_chars.py
