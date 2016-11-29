@@ -119,7 +119,9 @@ def punctuations_repl(match):
 
 
 def convert2vec(text, maxLen):
+    print "loading word2vec bin..."
     model = gensim.models.Word2Vec.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
+    print "load finished"
     data = np.zeros((len(dt), maxLen, 300))
     rowIndex = 0
     for row in text:
@@ -136,10 +138,13 @@ def convert2vec(text, maxLen):
 
 if __name__ == '__main__':
     path = '../data/training.csv'
+    path = '../data/test.csv'
     names = ["class", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
+    print "loading data..."
     dt = load_data(path, names=names, usecols=usecols)
     dt = dt[:10000]
+    print "load data finished"
     text = dt['data'].as_matrix()
     labels = dt['class'].as_matrix()
     maxLen = 0
@@ -148,3 +153,4 @@ if __name__ == '__main__':
     print 'Max length of words: %d' % maxLen
     data = convert2vec(text, maxLen)
     np.save('data.dat', data)
+    print data

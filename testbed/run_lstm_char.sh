@@ -1,1 +1,0 @@
-THEANO_FLAGS=gcc.cxxflags='-march=x86-64',device=cpu,floatX=float32 python ./lstm_chars.py
