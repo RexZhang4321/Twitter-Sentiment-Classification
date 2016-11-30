@@ -231,15 +231,10 @@ def test_model(model_fname, x_test, y_test, hyparams, vocab):
     # lasagne.layers.set_all_param_values(clf.values(), params)
     print "model built."
 
-    print 1
     test_output = lasagne.layers.get_output(clf['softmax'], deterministic=True)
-    print 2
     val_cost_func = lasagne.objectives.categorical_crossentropy(test_output, y).mean()
-    print 3
     preds = T.argmax(test_output, axis=1)
-    print 4
     val_acc_func = T.mean(T.eq(preds, y), dtype=theano.config.floatX)
-    print 5
     val_func = theano.function([X, M, y], [val_cost_func, val_acc_func, preds], allow_input_downcast=True)
 
     print 6
@@ -276,12 +271,50 @@ def read_model_from_file(model, fname):
         data = pickle.load(f)
     lasagne.layers.set_all_param_values(model.values(), data)
 
+
+class Predictor():
+
+    def __init__(self, model_name, vocab):
+        pad_char = u'♥'
+        vocab[pad_char] = 0
+        self.model_name = model_name
+        self.vocab = vocab
+        self._build_model()
+
+    def _build_model(self):
+        hyparams = hparams.HParams()
+        hyparams.embedding_dim = 100
+        X = T.imatrix('X')
+        M = T.matrix('M')
+        y = T.ivector('y')
+        print "building LSTM model..."
+        clf = build_model(hyparams, self.vocab, 2, invar=X, maskvar=M)
+        read_model_from_file(clf, self.model_name)
+        print "model built."
+        test_output = lasagne.layers.get_output(clf['softmax'], deterministic=True)
+        val_cost_func = lasagne.objectives.categorical_crossentropy(test_output, y).mean()
+        preds = T.argmax(test_output, axis=1)
+        val_acc_func = T.mean(T.eq(preds, y), dtype=theano.config.floatX)
+        val_func = theano.function([X, M, y], [val_cost_func, val_acc_func, preds], allow_input_downcast=True)
+        self.pred = val_func
+
+    def predict(self, txt):
+        txt = preprocess_char.load_from_one_text(txt, self.vocab)
+        _, _, test_pred = self.pred(txt[:, :, 0], txt[:, :, 1], [0])
+        return test_pred
+
+
 if __name__ == '__main__':
-    path = '../data/training.csv'
-    print "loading data..."
+    # path = '../data/training.csv'
+    # print "loading data..."
     with open('../model/senti_vocab.pkl', 'r') as fp:
         vocab = pickle.load(fp)
         print vocab
+    clf = Predictor("test5_2point_1.6M_1", vocab)
+    while True:
+        txt = raw_input("Type a tweet: ")
+        print clf.predict(txt)
+    '''
     x_train, y_train = preprocess_char.load_from_file_with_vocab(path, vocab, mode='senti')
     hyparams = hparams.HParams()
     hyparams.nepochs = 1
@@ -299,3 +332,4 @@ if __name__ == '__main__':
             cnt += 1
     print cnt
     test_model(fname, x_train, y_train, hyparams, vocab)
+    '''
