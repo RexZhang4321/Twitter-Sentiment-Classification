@@ -1,3 +1,4 @@
 *.pyc
 diffs
 GoogleNews-vectors-negative300.bin
+twitter_config.py
