@@ -274,11 +274,12 @@ def read_model_from_file(model, fname):
 
 class Predictor():
 
-    def __init__(self, model_name, vocab):
+    def __init__(self, model_name, vocab, nclass):
         pad_char = u'♥'
         vocab[pad_char] = 0
         self.model_name = model_name
         self.vocab = vocab
+        self.nclass = nclass
         self._build_model()
 
     def _build_model(self):
@@ -288,7 +289,7 @@ class Predictor():
         M = T.matrix('M')
         y = T.ivector('y')
         print "building LSTM model..."
-        clf = build_model(hyparams, self.vocab, 2, invar=X, maskvar=M)
+        clf = build_model(hyparams, self.vocab, self.nclass, invar=X, maskvar=M)
         read_model_from_file(clf, self.model_name)
         print "model built."
         test_output = lasagne.layers.get_output(clf['softmax'], deterministic=True)

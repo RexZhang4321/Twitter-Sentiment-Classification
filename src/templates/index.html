@@ -16,10 +16,10 @@
           <a class="nav-link" href="/">Home <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="/static/index2.html">Features</a>
+          <a class="nav-link" href="/static/index2.html">Twitter-Topic</a>
         </li>
         <li class="nav-item">
-          <a class="nav-link" href="#">Contact</a>
+          <a class="nav-link" href="#">Misc</a>
         </li>
       </ul>
     </nav>
@@ -27,13 +27,14 @@
       <h1>Twitter sentiment analysis</h1>
       <p>Multiple models for 2 points (positive and negative) and 3 points (plus neutral) twitter sentiment classification.</p>
       <p>
-        <a href="#" id="send-2points" class="btn btn-lg btn-success">Try!</a>
+        <a href="#" id="send-points" class="btn btn-lg btn-success">Try 2!</a>
+        <a href="#" id="send-3points" class="btn btn-lg btn-success">Try 3!</a>
       </p>
       <p>
         <input type="text" class="form-control" id="tweet-input" placeholder="Type a tweet here..." autocomplete="off">
       </p>
       <p>
-        <table class="table table-striped">
+        <table id="tweet-res-table" class="table table-striped">
           <thead>
             <tr>
               <th></th>
@@ -42,11 +43,6 @@
             </tr>
           </thead>
           <tbody>
-            <tr>
-              <th></th>
-              <th>LSTM</th>
-              <th id="LSTM-res"></th>
-            </tr>
           </tbody>
         </table>
       </p>
@@ -54,7 +50,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.1/jquery.min.js" integrity="sha384-3ceskX3iaEnIogmQchP8opvBy3Mi7Ce34nWjpBIwVTHfGYWQS9jwHDVRnpKKHJg7" crossorigin="anonymous"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.3.7/js/tether.min.js" integrity="sha384-XTs3FgkjiBgo8qjEjBk0tGmf3wPrWtA6coPfQDfFEY8AnYJwjalXCiosYRBIBZX8" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.5/js/bootstrap.min.js" integrity="sha384-BLiI7JTZm+JWlgKa0M0kGRpJbF2J8q+qreVrKBC47e3K6BW78kGLrCkeRX6I9RoK" crossorigin="anonymous"></script>
-    <script src="/static/index.js"></script>
+    <script src="/static/index.js?v=1"></script>
     </body>
 
 </html>
