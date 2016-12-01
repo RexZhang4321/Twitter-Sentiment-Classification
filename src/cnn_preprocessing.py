@@ -100,9 +100,12 @@ def load_tsv_data(path):
     shuffle_indices = np.random.permutation(np.arange(len(data)))
     data = data[shuffle_indices]
     x = data[:, 2]
-    y = data[:, 1]
-    _, y = np.unique(y, return_inverse=True)
-    return x, y
+    _y = data[:, 1]
+    y = np.zeros(len(_y))
+    y[np.where(_y == 'positive')] = 2
+    y[np.where(_y == 'neutral')] = 1
+    y[np.where(_y == 'negative')] = 0
+    return x, y.astype(int)
 
 
 def load_data_and_labels(path):
@@ -162,9 +165,9 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
             yield (shuffled_x[start_index:end_index], shuffled_y[start_index:end_index])
 
 #
-# if __name__ == '__main__':
-#     x, y = load_data_and_labels('../data/semeval/test.tsv')
-#     # x, y = load_data_and_labels('../data/semeval/dev.tsv')
+if __name__ == '__main__':
+    x, y = load_data_and_labels('../data/semeval/test.tsv')
+    # x, y = load_data_and_labels('../data/semeval/dev.tsv')
 #     # maxLen = 0
 #     # for row in x:
 #     #     maxLen = max(len(row.split(' ')), maxLen)
