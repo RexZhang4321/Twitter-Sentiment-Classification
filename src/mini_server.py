@@ -97,7 +97,7 @@ def predict_for_list_cnn():
     '''
     if int(model_type) == 2:
         # put your 2 points prediction here
-        cnn_pred = cnn_evaluate_3point.pred(txt, word2vec_model, 30)
+        cnn_pred = cnn_evaluate_2point.pred(txt, word2vec_model, 30)
         for i in range(0, len(txt)):
             pred_lst = []
             pred_lst.append({
