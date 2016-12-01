@@ -1,8 +1,6 @@
 import tensorflow as tf
 import numpy as np
 from cnn_preprocessing import parse_row
-import gensim
-word2vec_model = gensim.models.Word2Vec.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
 
 def word2vec(rows, model, maxLen):
     data = np.zeros((len(rows), maxLen, 300))
