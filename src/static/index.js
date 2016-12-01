@@ -83,18 +83,21 @@ $("#send-search-req2").click(function() {
         for (var i = 0; i < data.length; i++) {
             var text = data[i]['text'];
             var pred_lst = data[i]['predict'];
+            var confident = 0;
             for (var j = 0; j < pred_lst.length; j++) {
                 parse_one_tweet_pred(2, pred_lst[j], function(pred, model) {
                     console.log(pred);
                     if (pred == "positive") {
                         n_pos += 1;
+                        confident += 1;
                     } else {
                         n_neg += 1;
                     }
-                    var row = construct_row(i + 1, text, pred);
-                    $('#tweet-res-table > tbody:last-child').append(row);
+                    console.log(model, ": ", pred);
                 });
             }
+            var row = construct_row(i + 1, text, confident / pred_lst.length);
+            $('#tweet-res-table > tbody:last-child').append(row);
         }
         var ctx = $("#myChart");
         var data = {
@@ -137,20 +140,23 @@ $("#send-search-req3").click(function() {
         for (var i = 0; i < data.length; i++) {
             var text = data[i]['text'];
             var pred_lst = data[i]['predict'];
+            var confident = 0;
             for (var j = 0; j < pred_lst.length; j++) {
                 parse_one_tweet_pred(3, pred_lst[j], function(pred, model) {
-                    console.log(pred);
                     if (pred == "positive") {
                         n_pos += 1;
+                        confident += 2;
                     } else if (pred == "negative") {
                         n_neg += 1;
                     } else {
                         n_neu += 1;
+                        confident += 1;
                     }
-                    var row = construct_row(i + 1, text, pred);
-                    $('#tweet-res-table > tbody:last-child').append(row);
+                    console.log(model, ": ", pred);
                 });
             }
+            var row = construct_row(i + 1, text, confident / pred_lst.length);
+            $('#tweet-res-table > tbody:last-child').append(row);
         }
         var ctx = $("#myChart");
         var data = {
