@@ -82,7 +82,7 @@ class CNN_Model(object):
             l2_loss += tf.nn.l2_loss(b)
             self.scores = tf.nn.xw_plus_b(self.h_drop1, W, b, name="scores")
             self.predictions = tf.argmax(self.scores, 1, name="predictions")
-            self.init_y = tf.argmax(self.init_y, 1, name="init_y")
+            self.init_y = tf.argmax(self.input_y, 1, name="init_y")
             # CalculateMean cross-entropy loss
         with tf.name_scope("loss"):
             losses = tf.nn.softmax_cross_entropy_with_logits(self.scores, self.input_y)
