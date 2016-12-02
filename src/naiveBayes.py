@@ -4,6 +4,7 @@ import preprocessing
 import logging
 import pickle
 import os
+import sklearn.metrics
 
 
 def naive_bayes_2_points(n_gram=1, use_bern=False):
@@ -35,9 +36,22 @@ def naive_bayes_2_points(n_gram=1, use_bern=False):
             model["dic"] = dic
             pickle.dump(model, output)
 
-    score = clf.score(x_test, y_test)
-    logging.info("test accuracy %.4f with %s gram %s trained by naive bayes for 2 points" % (score, str(n_gram),
+    accuracy = clf.score(x_test, y_test)
+    logging.info("test accuracy %.4f with %s gram %s trained by naive bayes for 2 points" % (accuracy, str(n_gram),
                                                                                              model_type))
+    y_predict = clf.predict(x_test)
+    precision = sklearn.metrics.precision_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "precision %.4f with %s gram %s trained by naive bayes for 2 points" % (precision, str(n_gram), model_type))
+
+    recall = sklearn.metrics.recall_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "recall score %.4f with %s gram %s trained by naive bayes for 2 points" % (recall, str(n_gram), model_type))
+
+    f1_score = sklearn.metrics.f1_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "f1_score %.4f with %s gram %s trained by naive bayes for 2 points" % (f1_score, str(n_gram), model_type))
+
     return clf
 
 
@@ -71,7 +85,22 @@ def naive_bayes_3_points(n_gram=1, use_bern=False):
             pickle.dump(model, output)
 
     score = clf.score(x_test, y_test)
-    logging.info("test accuracy %.4f with %s gram %s trained by naive bayes for 3 points" % (score, str(n_gram), model_type))
+    logging.info(
+        "test accuracy %.4f with %s gram %s trained by naive bayes for 3 points" % (score, str(n_gram), model_type))
+
+    y_predict = clf.predict(x_test)
+    precision = sklearn.metrics.precision_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "precision %.4f with %s gram %s trained by naive bayes for 3 points" % (precision, str(n_gram), model_type))
+
+    recall = sklearn.metrics.recall_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "recall score %.4f with %s gram %s trained by naive bayes for 3 points" % (recall, str(n_gram), model_type))
+
+    f1_score = sklearn.metrics.f1_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "f1_score %.4f with %s gram %s trained by naive bayes for 3 points" % (f1_score, str(n_gram), model_type))
+
     return clf
 
 
