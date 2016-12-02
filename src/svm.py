@@ -4,6 +4,9 @@ import numpy as np
 import logging
 import threading
 from sklearn.metrics import accuracy_score
+from sklearn.metrics import precision_score
+from sklearn.metrics import recall_score
+from sklearn.metrics import f1_score
 import os
 import pickle
 
@@ -30,6 +33,20 @@ def svm_2_points(n_gram=1):
 
     score = best_clf.score(x_test, y_test)
     logging.info("test accuracy %.4f with %s gram trained by svm for 2 points" % (score, str(n_gram)))
+
+    y_predict = best_clf.predict(x_test)
+    precision = precision_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "precision %.4f with %s gram trained by svm for 2 points" % (precision, str(n_gram)))
+
+    recall = recall_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "recall score %.4f with %s gram trained by svm for 2 points" % (recall, str(n_gram)))
+
+    f1 = f1_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "f1_score %.4f with %s gram trained by svm for 2 points" % (f1, str(n_gram)))
+
     return best_clf
 
 
@@ -55,6 +72,20 @@ def svm_3_points(n_gram=1):
 
     score = best_clf.score(x_test, y_test)
     logging.info("test accuracy %.4f with %s gram trained by svm for 3 points" % (score, str(n_gram)))
+
+    y_predict = best_clf.predict(x_test)
+    precision = precision_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "precision %.4f with %s gram trained by svm for 3 points" % (precision, str(n_gram)))
+
+    recall = recall_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "recall score %.4f with %s gram trained by svm for 3 points" % (recall, str(n_gram)))
+
+    f1 = f1_score(y_test, y_predict, average="weighted")
+    logging.info(
+        "f1_score %.4f with %s gram trained by svm for 3 points" % (f1, str(n_gram)))
+
     return best_clf
 
 
