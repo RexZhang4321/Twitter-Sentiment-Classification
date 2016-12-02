@@ -40,15 +40,15 @@ def naive_bayes_2_points(n_gram=1, use_bern=False):
     logging.info("test accuracy %.4f with %s gram %s trained by naive bayes for 2 points" % (accuracy, str(n_gram),
                                                                                              model_type))
     y_predict = clf.predict(x_test)
-    precision = sklearn.metrics.precision_score(y_test, y_predict)
+    precision = sklearn.metrics.precision_score(y_test, y_predict, average="micro")
     logging.info(
         "precision %.4f with %s gram %s trained by naive bayes for 2 points" % (precision, str(n_gram), model_type))
 
-    recall = sklearn.metrics.recall_score(y_test, y_predict)
+    recall = sklearn.metrics.recall_score(y_test, y_predict, average="micro")
     logging.info(
         "recall score %.4f with %s gram %s trained by naive bayes for 2 points" % (recall, str(n_gram), model_type))
 
-    f1_score = sklearn.metrics.f1_score(y_test, y_predict)
+    f1_score = sklearn.metrics.f1_score(y_test, y_predict, average="micro")
     logging.info(
         "f1_score %.4f with %s gram %s trained by naive bayes for 2 points" % (f1_score, str(n_gram), model_type))
 
@@ -89,15 +89,15 @@ def naive_bayes_3_points(n_gram=1, use_bern=False):
         "test accuracy %.4f with %s gram %s trained by naive bayes for 3 points" % (score, str(n_gram), model_type))
 
     y_predict = clf.predict(x_test)
-    precision = sklearn.metrics.precision_score(y_test, y_predict)
+    precision = sklearn.metrics.precision_score(y_test, y_predict, average="micro")
     logging.info(
         "precision %.4f with %s gram %s trained by naive bayes for 3 points" % (precision, str(n_gram), model_type))
 
-    recall = sklearn.metrics.recall_score(y_test, y_predict)
+    recall = sklearn.metrics.recall_score(y_test, y_predict, average="micro")
     logging.info(
         "recall score %.4f with %s gram %s trained by naive bayes for 3 points" % (recall, str(n_gram), model_type))
 
-    f1_score = sklearn.metrics.f1_score(y_test, y_predict)
+    f1_score = sklearn.metrics.f1_score(y_test, y_predict, average="micro")
     logging.info(
         "f1_score %.4f with %s gram %s trained by naive bayes for 3 points" % (f1_score, str(n_gram), model_type))
 

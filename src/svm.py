@@ -35,15 +35,15 @@ def svm_2_points(n_gram=1):
     logging.info("test accuracy %.4f with %s gram trained by svm for 2 points" % (score, str(n_gram)))
 
     y_predict = best_clf.predict(x_test)
-    precision = precision_score(y_test, y_predict)
+    precision = precision_score(y_test, y_predict, average="micro")
     logging.info(
         "precision %.4f with %s gram trained by svm for 2 points" % (precision, str(n_gram)))
 
-    recall = recall_score(y_test, y_predict)
+    recall = recall_score(y_test, y_predict, average="micro")
     logging.info(
         "recall score %.4f with %s gram trained by svm for 2 points" % (recall, str(n_gram)))
 
-    f1 = f1_score(y_test, y_predict)
+    f1 = f1_score(y_test, y_predict, average="micro")
     logging.info(
         "f1_score %.4f with %s gram trained by svm for 2 points" % (f1, str(n_gram)))
 
@@ -74,15 +74,15 @@ def svm_3_points(n_gram=1):
     logging.info("test accuracy %.4f with %s gram trained by svm for 3 points" % (score, str(n_gram)))
 
     y_predict = best_clf.predict(x_test)
-    precision = precision_score(y_test, y_predict)
+    precision = precision_score(y_test, y_predict, average="micro")
     logging.info(
         "precision %.4f with %s gram trained by svm for 3 points" % (precision, str(n_gram)))
 
-    recall = recall_score(y_test, y_predict)
+    recall = recall_score(y_test, y_predict, average="micro")
     logging.info(
         "recall score %.4f with %s gram trained by svm for 3 points" % (recall, str(n_gram)))
 
-    f1 = f1_score(y_test, y_predict)
+    f1 = f1_score(y_test, y_predict, average="micro")
     logging.info(
         "f1_score %.4f with %s gram trained by svm for 3 points" % (f1, str(n_gram)))
 
