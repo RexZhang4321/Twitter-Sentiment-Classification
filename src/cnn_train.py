@@ -7,9 +7,11 @@ import cnn_preprocessing
 from cnn_model import CNN_Model
 from tensorflow.contrib import learn
 
-tf.flags.DEFINE_string("train_data_file", "../data/semeval/train.tsv", "Data source for the training data.")
-tf.flags.DEFINE_string("dev_data_file", "../data/semeval/dev.tsv", "Data source for the validation data.")
-tf.flags.DEFINE_string("test_data_file", "../data/semeval/test.tsv", "Data source for the test data.")
+dataset = '3-points'
+
+tf.flags.DEFINE_string("train_data_file", "../data/semeval/train.tsv", "Data source for the 3 point training data.")
+tf.flags.DEFINE_string("data_file_2point", "../data/training.1600000.processed.noemoticon.csv", "Data source for the 2 point data.")
+tf.flags.DEFINE_string("test_data_file", "../data/semeval/test.tsv", "Data source for the 3 point test data.")
 
 # Model Hyperparameters
 tf.flags.DEFINE_string("filter_sizes", "3,4,5", "Comma-separated filter sizes (default: '3,4,5')")
@@ -35,10 +37,15 @@ for attr, value in sorted(FLAGS.__flags.items()):
 print("")
 
 print("Loading data...")
-x_train, y_train = cnn_preprocessing.load_data_and_labels(FLAGS.train_data_file)
-x_dev, y_dev = cnn_preprocessing.load_data_and_labels(FLAGS.test_data_file)
-
-
+if dataset == '3-points':
+    x_train, y_train = cnn_preprocessing.load_data_and_labels(FLAGS.train_data_file)
+    x_dev, y_dev = cnn_preprocessing.load_data_and_labels(FLAGS.test_data_file)
+elif dataset == '2-points':
+    x, y = cnn_preprocessing.load_data_and_labels(FLAGS.data_file_2point)
+    dev_sample_index = -1 * int(0.1 * float(len(y)))
+    x_train, x_dev = x[:dev_sample_index], x[dev_sample_index:]
+    x_dev = cnn_preprocessing.convert2vec(x_dev)
+    y_train, y_dev = y[:dev_sample_index], y[dev_sample_index:]
 
 with tf.Graph().as_default():
     session_conf = tf.ConfigProto(
@@ -138,7 +145,10 @@ with tf.Graph().as_default():
             (x_train, y_train), FLAGS.batch_size, FLAGS.num_epochs)
         # Training loop. For each batch...
         for batch in batches:
-            x_batch = batch[0]
+            if dataset == '3-points':
+                x_batch = batch[0]
+            elif dataset == '2-points':
+                x_batch = cnn_preprocessing.convert2vec(batch[0])
             y_batch = batch[1]
             train_step(x_batch, y_batch)
             current_step = tf.train.global_step(sess, global_step)

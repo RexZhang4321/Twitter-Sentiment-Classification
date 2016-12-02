@@ -5,12 +5,13 @@ import pandas as pd
 import gensim
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
-
 stops = set(stopwords.words("english"))
 punctuation = string.punctuation
-maxLen = 24
 dataset = '3-points'
-
+if dataset == '3-points':
+    maxLen = 24
+elif dataset == '2-points':
+    maxLen = 30
 
 def parse_row(row):
     _row = ' '
@@ -24,7 +25,8 @@ def parse_row(row):
     for (repl, regx) in emoticons_regex:
         row = re.sub(regx, '', row)
     # remove duplicate chars >= 3
-    row = re.sub(word_bound_regex, ' ', row)
+    if dataset == '2-points':
+        row = re.sub(word_bound_regex, ' ', row)
     row = re.sub(rpt_regex, rpt_repl, row)
     for word in word_tokenize(row):
         if word in stops or len(word) == 1:
@@ -120,7 +122,8 @@ def load_data_and_labels(path):
     y = np.zeros((len(_y), label_num))
     y[np.arange(len(_y)), _y] = 1
     # apply word2vec
-    x_text = convert2vec(x_text, maxLen)
+    if dataset == '3-ponits':
+        x_text = convert2vec(x_text, maxLen)
     return x_text, y
 
 
