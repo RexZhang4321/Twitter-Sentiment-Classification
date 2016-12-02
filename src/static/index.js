@@ -20,7 +20,7 @@ construct_row = function(idx, text, pred) {
     var pre_row = "<tr><th>";
     var mid_row = "</th><th>";
     var end_row = "</th></tr>";
-    return pre_row + idx + mid_row + text + mid_row + pred + end_row;
+    return pre_row + idx + mid_row + text + mid_row + "<a id=\"" + idx + "pred\">" + pred + "</a>" + end_row;
 }
 
 parse_one_tweet_pred = function(model_type, data, fn) {
@@ -83,21 +83,29 @@ $("#send-search-req2").click(function() {
         for (var i = 0; i < data.length; i++) {
             var text = data[i]['text'];
             var pred_lst = data[i]['predict'];
-            var confident = 0;
+            var details = "";
+            var n_pos_t = 0;
+            var n_neg_t = 0;
             for (var j = 0; j < pred_lst.length; j++) {
                 parse_one_tweet_pred(2, pred_lst[j], function(pred, model) {
-                    console.log(pred);
+                    details = details + model + ": " + pred + "\n";
                     if (pred == "positive") {
-                        n_pos += 1;
-                        confident += 1;
+                        n_pos_t += 1;
                     } else {
-                        n_neg += 1;
+                        n_neg_t += 1;
                     }
-                    console.log(model, ": ", pred);
                 });
             }
-            var row = construct_row(i + 1, text, confident / pred_lst.length);
+            if (n_pos_t >= n_neg_t) {
+                pred = "positive";
+                n_pos += 1;
+            } else {
+                pred = "negative";
+                n_neg += 1;
+            }
+            var row = construct_row(i + 1, text, pred);
             $('#tweet-res-table > tbody:last-child').append(row);
+            $('#' + (i + 1) + "pred").attr("title", details.slice(0, -1));
         }
         var ctx = $("#myChart");
         var data = {
@@ -140,23 +148,35 @@ $("#send-search-req3").click(function() {
         for (var i = 0; i < data.length; i++) {
             var text = data[i]['text'];
             var pred_lst = data[i]['predict'];
-            var confident = 0;
+            var details = "";
+            var n_pos_t = 0;
+            var n_neg_t = 0;
+            var n_neu_t = 0;
             for (var j = 0; j < pred_lst.length; j++) {
                 parse_one_tweet_pred(3, pred_lst[j], function(pred, model) {
+                    details = details + model + ": " + pred + "\n";
                     if (pred == "positive") {
-                        n_pos += 1;
-                        confident += 2;
+                        n_pos_t += 1;
                     } else if (pred == "negative") {
-                        n_neg += 1;
+                        n_neg_t += 1;
                     } else {
-                        n_neu += 1;
-                        confident += 1;
+                        n_neu_t += 1;
                     }
-                    console.log(model, ": ", pred);
                 });
             }
-            var row = construct_row(i + 1, text, confident / pred_lst.length);
+            if (n_pos_t > n_neg_t && n_pos_t > n_neu_t) {
+                n_pos += 1;
+                pred = "positive";
+            } else if (n_neg_t > n_pos_t && n_neg_t > n_neu_t) {
+                n_neg += 1;
+                pred = "negative";
+            } else {
+                n_neu += 1;
+                pred = "neutral";
+            }
+            var row = construct_row(i + 1, text, pred);
             $('#tweet-res-table > tbody:last-child').append(row);
+            $('#' + (i + 1) + "pred").attr("title", details.slice(0, -1));
         }
         var ctx = $("#myChart");
         var data = {
