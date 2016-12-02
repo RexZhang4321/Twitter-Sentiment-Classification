@@ -5,9 +5,10 @@ import pandas as pd
 import gensim
 from nltk.tokenize import word_tokenize
 from nltk.corpus import stopwords
+model = gensim.models.Word2Vec.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
 stops = set(stopwords.words("english"))
 punctuation = string.punctuation
-dataset = '3-points'
+dataset = '2-points'
 if dataset == '3-points':
     maxLen = 24
 elif dataset == '2-points':
@@ -87,7 +88,7 @@ emoticons_regex = [(repl, re.compile(regex_union(escape_paren(regx))))
 def load_csv_data(path):
     names = ["class", "id", "time", "query", "user", "data"]
     usecols = [0, 5]
-    data = pd.read_csv(path, header=None, names=names, usecols=usecols, skiprows=798500, nrows=3000)
+    data = pd.read_csv(path, header=None, names=names, usecols=usecols)
     data['class'] = data['class'].map({0: 0, 4: 1})
     data = data.reindex(np.random.permutation(data.index))
     x = data['data'].as_matrix()
@@ -122,13 +123,12 @@ def load_data_and_labels(path):
     y = np.zeros((len(_y), label_num))
     y[np.arange(len(_y)), _y] = 1
     # apply word2vec
-    if dataset == '3-ponits':
-        x_text = convert2vec(x_text, maxLen)
+    if dataset == '3-points':
+        x_text = convert2vec(x_text, maxLen, model)
     return x_text, y
 
 
-def convert2vec(text, maxLen):
-    model = gensim.models.Word2Vec.load_word2vec_format('../data/GoogleNews-vectors-negative300.bin', binary=True)
+def convert2vec(text, maxLen, model):
     data = np.zeros((len(text), maxLen, 300))
     rowIndex = 0
     for row in text:
@@ -145,7 +145,7 @@ def convert2vec(text, maxLen):
     return data
 
 
-def batch_iter(data, batch_size, num_epochs, shuffle=True):
+def batch_iter(data, batch_size, num_epochs, shuffle=False):
     """
     Generates a batch iterator for a dataset.
     """

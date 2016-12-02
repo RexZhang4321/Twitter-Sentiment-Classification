@@ -7,10 +7,11 @@ import cnn_preprocessing
 from cnn_model import CNN_Model
 from tensorflow.contrib import learn
 
-dataset = '3-points'
+dataset = '2-points'
 
 tf.flags.DEFINE_string("train_data_file", "../data/semeval/train.tsv", "Data source for the 3 point training data.")
-tf.flags.DEFINE_string("data_file_2point", "../data/training.1600000.processed.noemoticon.csv", "Data source for the 2 point data.")
+tf.flags.DEFINE_string("train_data_file_2point", "../data/training.1600000.processed.noemoticon.csv", "Data source for the 2 point train data.")
+tf.flags.DEFINE_string("test_data_file_2point", "../data/testdata.manual.2009.06.14.csv", "Data source for the 2 point test data.")
 tf.flags.DEFINE_string("test_data_file", "../data/semeval/test.tsv", "Data source for the 3 point test data.")
 
 # Model Hyperparameters
@@ -36,16 +37,26 @@ for attr, value in sorted(FLAGS.__flags.items()):
     print("{}={}".format(attr.upper(), value))
 print("")
 
+if dataset == '2-points':
+    sequence_length = 30
+    num_classes = 2
+elif dataset == '3-points':
+    sequence_length = 24
+    num_classes = 3
+embedding_size = 300
+
 print("Loading data...")
 if dataset == '3-points':
     x_train, y_train = cnn_preprocessing.load_data_and_labels(FLAGS.train_data_file)
     x_dev, y_dev = cnn_preprocessing.load_data_and_labels(FLAGS.test_data_file)
 elif dataset == '2-points':
-    x, y = cnn_preprocessing.load_data_and_labels(FLAGS.data_file_2point)
-    dev_sample_index = -1 * int(0.1 * float(len(y)))
-    x_train, x_dev = x[:dev_sample_index], x[dev_sample_index:]
-    x_dev = cnn_preprocessing.convert2vec(x_dev)
-    y_train, y_dev = y[:dev_sample_index], y[dev_sample_index:]
+    x_train, y_train = cnn_preprocessing.load_data_and_labels(FLAGS.train_data_file_2point)
+    x_dev, y_dev = cnn_preprocessing.load_data_and_labels(FLAGS.test_data_file_2point)
+    # x, y = cnn_preprocessing.load_data_and_labels(FLAGS.data_file_2point)
+    # dev_sample_index = -1 * int(0.1 * float(len(y)))
+    # x_train, x_dev = x[:dev_sample_index], x[dev_sample_index:]
+    x_dev = cnn_preprocessing.convert2vec(x_dev, sequence_length, cnn_preprocessing.model)
+    # y_train, y_dev = y[:dev_sample_index], y[dev_sample_index:]
 
 with tf.Graph().as_default():
     session_conf = tf.ConfigProto(
@@ -54,9 +65,9 @@ with tf.Graph().as_default():
     sess = tf.Session(config=session_conf)
     with sess.as_default():
         cnn = CNN_Model(
-            sequence_length=x_train.shape[1],
-            num_classes=y_train.shape[1],
-            embedding_size=x_train.shape[2],
+            sequence_length,
+            num_classes,
+            embedding_size,
             filter_sizes=list(map(int, FLAGS.filter_sizes.split(","))),
             num_filters=FLAGS.num_filters,
             l2_reg_lambda=FLAGS.l2_reg_lambda)
@@ -148,7 +159,7 @@ with tf.Graph().as_default():
             if dataset == '3-points':
                 x_batch = batch[0]
             elif dataset == '2-points':
-                x_batch = cnn_preprocessing.convert2vec(batch[0])
+                x_batch = cnn_preprocessing.convert2vec(np.array(batch[0]), sequence_length, cnn_preprocessing.model)
             y_batch = batch[1]
             train_step(x_batch, y_batch)
             current_step = tf.train.global_step(sess, global_step)
