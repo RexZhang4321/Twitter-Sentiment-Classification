@@ -1,5 +1,4 @@
 import tensorflow as tf
-import sklearn as sk
 
 class CNN_Model(object):
     def __init__(
@@ -82,14 +81,14 @@ class CNN_Model(object):
             l2_loss += tf.nn.l2_loss(b)
             self.scores = tf.nn.xw_plus_b(self.h_drop1, W, b, name="scores")
             self.predictions = tf.argmax(self.scores, 1, name="predictions")
-            self.init_y = tf.argmax(self.input_y, 1, name="init_y")
+            #self.init_y = tf.argmax(self.input_y, 1, name="init_y")
             # CalculateMean cross-entropy loss
         with tf.name_scope("loss"):
             losses = tf.nn.softmax_cross_entropy_with_logits(self.scores, self.input_y)
             self.loss = tf.reduce_mean(losses) + l2_reg_lambda * l2_loss
-            self.precision = sk.metrics.precision_score(self.predictions, self.init_y)
-            self.recall = sk.metrics.recall_score(self.predictions, self.init_y)
-            self.f1 = sk.f1_score(self.predictions, self.init_y, average='weighted')
+            # self.precision = sk.metrics.precision_score(self.predictions.eval(), self.init_y.eval())
+            # self.recall = sk.metrics.recall_score(self.predictions.eval(), self.init_y.eval())
+            # self.f1 = sk.f1_score(self.predictions.eval(), self.init_y.eval(), average='weighted')
             # Accuracy
         with tf.name_scope("accuracy"):
             correct_predictions = tf.equal(self.predictions, tf.argmax(self.input_y, 1))

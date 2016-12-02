@@ -1,17 +1,21 @@
-import tensorflow as tf
-import numpy as np
+import datetime
 import os
 import time
-import datetime
+
+import numpy as np
+import sklearn as sk
+import tensorflow as tf
+
 import cnn_preprocessing
 from cnn_model import CNN_Model
-from tensorflow.contrib import learn
 
-dataset = '2-points'
+dataset = cnn_preprocessing.dataset
 
 tf.flags.DEFINE_string("train_data_file", "../data/semeval/train.tsv", "Data source for the 3 point training data.")
-tf.flags.DEFINE_string("train_data_file_2point", "../data/training.1600000.processed.noemoticon.csv", "Data source for the 2 point train data.")
-tf.flags.DEFINE_string("test_data_file_2point", "../data/testdata.manual.2009.06.14.csv", "Data source for the 2 point test data.")
+tf.flags.DEFINE_string("train_data_file_2point", "../data/training.1600000.processed.noemoticon.csv",
+                       "Data source for the 2 point train data.")
+tf.flags.DEFINE_string("test_data_file_2point", "../data/testdata.manual.2009.06.14.csv",
+                       "Data source for the 2 point test data.")
 tf.flags.DEFINE_string("test_data_file", "../data/semeval/test.tsv", "Data source for the 3 point test data.")
 
 # Model Hyperparameters
@@ -57,11 +61,12 @@ elif dataset == '2-points':
     # x_train, x_dev = x[:dev_sample_index], x[dev_sample_index:]
     x_dev = cnn_preprocessing.convert2vec(x_dev, sequence_length, cnn_preprocessing.model)
     # y_train, y_dev = y[:dev_sample_index], y[dev_sample_index:]
+y_dev_true = np.argmax(y_dev, 1)
 
 with tf.Graph().as_default():
     session_conf = tf.ConfigProto(
-      allow_soft_placement=FLAGS.allow_soft_placement,
-      log_device_placement=FLAGS.log_device_placement)
+        allow_soft_placement=FLAGS.allow_soft_placement,
+        log_device_placement=FLAGS.log_device_placement)
     sess = tf.Session(config=session_conf)
     with sess.as_default():
         cnn = CNN_Model(
@@ -112,20 +117,20 @@ with tf.Graph().as_default():
         checkpoint_prefix = os.path.join(checkpoint_dir, "model")
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
-        saver = tf.train.Saver(tf.all_variables(), max_to_keep = 0)
-
+        saver = tf.train.Saver(tf.all_variables(), max_to_keep=0)
 
         # Initialize all variables
         sess.run(tf.initialize_all_variables())
+
 
         def train_step(x_batch, y_batch):
             """
             A single training step
             """
             feed_dict = {
-              cnn.input_x: x_batch,
-              cnn.input_y: y_batch,
-              cnn.dropout_keep_prob: FLAGS.dropout_keep_prob
+                cnn.input_x: x_batch,
+                cnn.input_y: y_batch,
+                cnn.dropout_keep_prob: FLAGS.dropout_keep_prob
             }
             _, step, summaries, loss, accuracy = sess.run(
                 [train_op, global_step, train_summary_op, cnn.loss, cnn.accuracy],
@@ -134,22 +139,31 @@ with tf.Graph().as_default():
             print("{}: step {}, loss {:g}, acc {:g}".format(time_str, step, loss, accuracy))
             train_summary_writer.add_summary(summaries, step)
 
+
         def dev_step(x_batch, y_batch, writer=None):
             """
             Evaluates model on a dev set
             """
             feed_dict = {
-              cnn.input_x: x_batch,
-              cnn.input_y: y_batch,
-              cnn.dropout_keep_prob: 1.0
+                cnn.input_x: x_batch,
+                cnn.input_y: y_batch,
+                cnn.dropout_keep_prob: 1.0
             }
-            step, summaries, loss, accuracy, precision, recall, f1 = sess.run(
-                [global_step, dev_summary_op, cnn.loss, cnn.accuracy, cnn.precision, cnn.recall, cnn.f1],
+            step, summaries, loss, accuracy = sess.run(
+                [global_step, dev_summary_op, cnn.loss, cnn.accuracy],
                 feed_dict)
             time_str = datetime.datetime.now().isoformat()
-            print("{}: step {}, loss {:g}, acc {:g}, precision {:g}, recall {:g}, f1 {:g},".format(time_str, step, loss, accuracy, precision, recall, f1))
+            prediction = cnn.predictions.eval(feed_dict)
+            precision = sk.metrics.precision_score(prediction, y_dev_true, average='weighted')
+            recall = sk.metrics.recall_score(prediction, y_dev_true, average='weighted')
+            f1 = sk.metrics.f1_score(prediction, y_dev_true, average='weighted')
+
+            print("{}: step {}, loss {:g}, acc {:g}, precision {:g}, recall {:g}, f1 {:g},".format(time_str, step, loss,
+                                                                                                   accuracy, precision,
+                                                                                                   recall, f1))
             if writer:
                 writer.add_summary(summaries, step)
+
 
         # Generate batches
         batches = cnn_preprocessing.batch_iter(
