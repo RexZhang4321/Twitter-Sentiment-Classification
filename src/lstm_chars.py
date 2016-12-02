@@ -11,6 +11,7 @@ import time
 import preprocess_char
 import pickle
 import os
+import sklearn.metrics
 
 MAXLEN = 140
 SEED = 1234
@@ -251,11 +252,7 @@ def test_model(model_fname, x_test, y_test, hyparams, vocab):
         if i == 2:
             cnt2 += 1
     print cnt0, cnt1, cnt2
-    while True:
-        txt = raw_input("Type a tweet: ")
-        txt = preprocess_char.load_from_one_text(txt, vocab)
-        _, _, test_pred = val_func(txt[:, :, 0], txt[:, :, 1], [0])
-        print "Prediction: ", test_pred
+    return test_pred
 
 
 def write_model_to_file(model, fname):
@@ -299,12 +296,14 @@ class Predictor():
         val_func = theano.function([X, M, y], [val_cost_func, val_acc_func, preds], allow_input_downcast=True)
         self.pred = val_func
 
-    def predict(self, txt):
+    def predict(self, txt, y=None):
         data = preprocess_char.load_from_one_text(txt[0], self.vocab)
         for i in range(1, len(txt)):
             data = np.vstack([data, preprocess_char.load_from_one_text(txt[i], self.vocab)])
         txt = data
-        _, _, test_pred = self.pred(txt[:, :, 0], txt[:, :, 1], [0] * len(txt))
+        if y is None:
+            y = [0] * len(txt)
+        _, _, test_pred = self.pred(txt[:, :, 0], txt[:, :, 1], y)
         return test_pred
 
 
@@ -339,12 +338,19 @@ if __name__ == '__main__':
     print cnt
     test_model(fname, x_train, y_train, hyparams, vocab)
     '''
-    txt = [u'I thought that @CNN would get better after they failed so badly in their support of Hillary Clinton however, since election, they are worse!', u'BREAKING: Republican State Board Of Elections issue order requiring dismissal of all 52 McCrory election protests. https://t.co/iDkkc0dzXn', u'Trump will soon become the first president who failed to win a majority of the vote either in the general election\u2026 https://t.co/m2UEfPOkjc', u'RT @SHEPMJS: "Dem\'s re-elect Nancy Pelosi leader despite disenchantment over disappointing election results"\nPerfect!Keep Dem, swamp filled\u2026', u"@PcolaBucsfan I'm still in general election mode !! Lol", u"RT @rcooley123: Carl Bernstein Blasts Trump's Unhinged Voter Fraud Claim: 'More Paranoid Than Nixon' | \nhttps://t.co/ZgeVXFL0h1", u'Pelosi holds onto leadership - the same leadership that secured the cluster f*** that was the election. Great idea \U0001f621https://t.co/qvxleTQ8m9', u"RT @FoxNews: .@DrJillStein's Michigan Recount Could Cost Taxpayers $12 Million\nhttps://t.co/y2SCtWIkqO", u'RT @mattyglesias: On November 14, the federal government gave a $32 million tax subsidy to a company owned by Donald &amp; Ivanka Trump. https:\u2026', u'RT @FoxNewsResearch: Cabinet Picks: Entering week 4 since Election Day, #Trump selects his 5th &amp; 6th cabinet nominees, outpacing all #PEOTU\u2026', u'RT @CNN: JUST IN: House Minority Leader Nancy Pelosi defeats Tim Ryan to retain post as top elected Democrat in the House https://t.co/gI6m\u2026', u'https://t.co/hcfbig9WDH', u'Election results kae baad kaafi aasaan hoga## https://t.co/eldm7Ds2kL', u'RT @summerbrennan: Since the election, Russia has moved nuclear weapons closer to our longtime allies in Europe and Asia https://t.co/4AF7C\u2026', u'RT @jmdonsi: Pelosi voter n image of dem voters. Far left coastal libtards. Dems may never win another election!!! https://t.co/VUWmYxFMzO']
-    if type(txt) == list:
-        data = preprocess_char.load_from_one_text(txt[0], vocab)
-        for i in range(1, len(txt)):
-            data = np.vstack([data, preprocess_char.load_from_one_text(txt[i], vocab)])
-        txt = data
-    else:
-        txt = preprocess_char.load_from_one_text(txt, vocab)
-    print txt
+    path = '../data/training.csv'
+    x_test, y_test = preprocess_char.load_from_file_with_vocab(path, vocab, mode='senti')
+    print vocab
+    print x_test
+    x_test = x_test[:4000]
+    y_test = y_test[:4000]
+    clf = Predictor("test5_2point_1.6M_1", vocab, 2)
+    y_pred = clf.predict(x_test, y=y_test)
+    f1 = sklearn.metrics.f1_score(y_test, y_pred)
+    precision = sklearn.metrics.precision_score(y_test, y_pred)
+    recall = sklearn.metrics.recall_score(y_test, y_pred)
+    accuracy = sklearn.metrics.accuracy_score(y_test, y_pred)
+    print "precision", precision
+    print "recall", recall
+    print "f1", f1
+    print "accuracy", accuracy

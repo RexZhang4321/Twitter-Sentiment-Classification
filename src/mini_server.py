@@ -9,6 +9,7 @@ import twitter_service
 import json
 import cnn_evaluate_3point
 import cnn_evaluate_2point
+import naiveBayes
 app = Flask(__name__)
 app.debug = True
 
@@ -23,6 +24,9 @@ with open('../model/senti_vocab.pkl', 'r') as fp:
     lstm_vocab = pickle.load(fp)
 lstm2 = lstm_chars.Predictor("test5_2point_1.6M_1", lstm_vocab, 2)
 lstm3 = lstm_chars.Predictor("test5_3point_15", lstm_vocab, 3)
+
+nbc2_multi = naiveBayes.NBC(2, n_gram=1, use_bern=False)
+nbc3_multi = naiveBayes.NBC(3, n_gram=3, use_bern=False)
 
 tws = twitter_service.TwitterServ()
 
@@ -61,6 +65,10 @@ def predict_for_one_txt():
             'pred': int(cnn_evaluate_2point.pred(ss, word2vec_model, 30)[0]),
             'model': 'cnn'
         })
+        pred.append({
+            'pred': int(nbc2_multi.predict(ss)[0]),
+            'model': 'nbc_multi'
+        })
     else:
         # put 3 points prediction here
         pred.append({
@@ -70,6 +78,10 @@ def predict_for_one_txt():
         pred.append({
             'pred': int(cnn_evaluate_3point.pred(ss, word2vec_model, 24)[0]),
             'model': 'cnn'
+        })
+        pred.append({
+            'pred': int(nbc3_multi.predict(ss)[0]),
+            'model': 'nbc_multi'
         })
     return json.dumps(pred)
 
@@ -109,6 +121,7 @@ def predict_for_list():
         # put your 2 points prediction here
         lstm_pred = lstm2.predict(txt)
         cnn_pred = cnn_evaluate_2point.pred(txt, word2vec_model, 30)
+        nbc2_multi_pred = nbc2_multi.predict(txt)
         for i in range(0, len(txt)):
             pred_lst = []
             pred_lst.append({
@@ -118,6 +131,10 @@ def predict_for_list():
             pred_lst.append({
                 "model": 'cnn',
                 "pred": cnn_pred[i]
+            })
+            pred_lst.append({
+                'model': 'nbc_multi',
+                'pred': nbc2_multi_pred[i]
             })
             res_lst.append({
                 'text': txt[i],
@@ -127,6 +144,7 @@ def predict_for_list():
         # put your 3 points prediction here
         lstm_pred = lstm3.predict(txt)
         cnn_pred = cnn_evaluate_3point.pred(txt, word2vec_model, 24)
+        nbc3_multi_pred = nbc3_multi.predict(txt)
         for i in range(0, len(txt)):
             pred_lst = []
             pred_lst.append({
@@ -136,6 +154,10 @@ def predict_for_list():
             pred_lst.append({
                 "model": 'cnn',
                 "pred": cnn_pred[i]
+            })
+            pred_lst.append({
+                'model': 'nbc_multi',
+                'pred': nbc3_multi_pred[i]
             })
             res_lst.append({
                 'text': txt[i],
